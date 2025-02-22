@@ -1,6 +1,6 @@
 package com.monique.jes;
 
-public class App {
+public class JES {
     public static void main( String[] args ) {
         
     }
