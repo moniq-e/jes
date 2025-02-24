@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.monique.jes.CPU;
+import com.monique.jes.cpu.CPU;
 
 public class JESTest {
 

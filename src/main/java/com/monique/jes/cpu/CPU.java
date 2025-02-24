@@ -1,4 +1,4 @@
-package com.monique.jes;
+package com.monique.jes.cpu;
 
 //21441960 Hz
 public class CPU {
@@ -6,7 +6,7 @@ public class CPU {
     private int pc; // 16 bit
     private short sp; // 8 bit
     private short acc; // 8 bit
-    private short pstatus; //8 bit
+    private short pstatus; // 8 bit
     private short irx; // 8 bit
     private short iry; // 8 bit
 
@@ -43,44 +43,36 @@ public class CPU {
     }
 
     public void run() {
+        var opcodes = Opcode.getOpcodesMap();
         while (true) {
-            var opcode = memRead(pc);
+            var code = memRead(pc);
             incPC();
 
-            switch (opcode) {
+            var pcState = pc;
+
+            var opcode = opcodes.get(code);
+
+            switch (code) {
                 case 0x00: //BRK
                     return;
                 case 0xA9: //LDA
-                    lda(AddressingMode.Immediate);
-                    incPC();
-                    break;
                 case 0xA5:
-                    lda(AddressingMode.ZeroPage);
-                    incPC();
-                    break;
                 case 0xB5:
-                    lda(AddressingMode.ZeroPage_X);
-                    incPC();
-                    break;
                 case 0xAD:
-                    lda(AddressingMode.Absolute);
-                    incPC(2);
-                    break;
                 case 0xBD:
-                    lda(AddressingMode.Absolute_X);
-                    incPC(2);
-                    break;
                 case 0xB9:
-                    lda(AddressingMode.Absolute_Y);
-                    incPC(2);
-                    break;
                 case 0xA1:
-                    lda(AddressingMode.Indirect_X);
-                    incPC();
-                    break;
                 case 0xB1:
-                    lda(AddressingMode.Indirect_Y);
-                    incPC();
+                    lda(opcode.getMode());
+                    break;
+                case 0x85: //STA
+                case 0x95:
+                case 0x8D:
+                case 0x9D:
+                case 0x99:
+                case 0x81:
+                case 0x91:
+                    sta(opcode.getMode());
                     break;
                 case 0xAA: //TAX
                     setIrx(acc);
@@ -93,6 +85,10 @@ public class CPU {
                 default:
                     break;
             }
+
+            if (pcState == pc) {
+                incPC(opcode.getLength() - 1);
+            }
         }
     }
 
@@ -100,6 +96,11 @@ public class CPU {
         var addr = getOperandAddr(mode);
         setAcc(memRead(addr));
         updateZNFlags(acc);
+    }
+
+    public void sta(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        memWrite(addr, acc);
     }
 
     public short memRead(int addr) {
@@ -125,19 +126,19 @@ public class CPU {
                 return pc;
             case ZeroPage:
                 return memRead(pc);
-            case ZeroPage_X:
+            case ZeroPageX:
                 return (memRead(pc) + irx) & 0xFFFF;
-            case ZeroPage_Y:
+            case ZeroPageY:
                 return (memRead(pc) + iry) & 0xFFFF;
             case Absolute:
                 return memRead16(pc);
-            case Absolute_X:
+            case AbsoluteX:
                 return (memRead16(pc) + irx) & 0xFFFF;
-            case Absolute_Y:
+            case AbsoluteY:
                 return (memRead16(pc) + iry) & 0xFFFF;
-            case Indirect_X:
+            case IndirectX:
                 return memRead16(memRead(pc) + irx);
-            case Indirect_Y:
+            case IndirectY:
                 return memRead16(memRead(pc)) + iry;
             case NoneAddressing:
             default:
@@ -206,16 +207,6 @@ public class CPU {
         setStatusFlag(Flag.N, (value & 0x80) != 0);
     }
 
-    private enum Flag {
-        N,
-        V,
-        B,
-        D,
-        I,
-        Z, 
-        C
-    }
-
     public short unsignByte(int value) {
         return (short) (value & 0xFF);
     }
@@ -234,19 +225,6 @@ public class CPU {
 
     public void setIrx(int value) {
         irx = unsignByte(value);
-    }
-
-    private enum AddressingMode {
-        Immediate,
-        ZeroPage,
-        ZeroPage_X,
-        ZeroPage_Y,
-        Absolute,
-        Absolute_X,
-        Absolute_Y,
-        Indirect_X,
-        Indirect_Y,
-        NoneAddressing,
     }
 
     // Test only
