@@ -44,6 +44,7 @@ public class CPU {
 
     public void run() {
         var opcodes = Opcode.getOpcodesMap();
+
         while (true) {
             var code = memRead(pc);
             incPC();

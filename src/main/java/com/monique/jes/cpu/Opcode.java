@@ -7,7 +7,7 @@ public class Opcode {
     private static final ArrayList<Opcode> opcodes = new ArrayList<>();
 
     static {
-        opcodes.add(new Opcode(0x00, "BRK", 1, 7, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0x00, "BRK", 1, 7));
 
         opcodes.add(new Opcode(0x69, "ADC", 2, 2, AddressingMode.Immediate));
         opcodes.add(new Opcode(0x65, "ADC", 2, 3, AddressingMode.ZeroPage));
@@ -27,15 +27,15 @@ public class Opcode {
         opcodes.add(new Opcode(0x21, "AND", 2, 6, AddressingMode.IndirectX));
         opcodes.add(new Opcode(0x31, "AND", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
 
-        opcodes.add(new Opcode(0x0A, "ASL", 1, 2, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0x0A, "ASL", 1, 2));
         opcodes.add(new Opcode(0x06, "ASL", 2, 5, AddressingMode.ZeroPage));
         opcodes.add(new Opcode(0x16, "ASL", 2, 6, AddressingMode.ZeroPageX));
         opcodes.add(new Opcode(0x0E, "ASL", 3, 6, AddressingMode.Absolute));
         opcodes.add(new Opcode(0x1E, "ASL", 3, 7, AddressingMode.AbsoluteX));
 
-        opcodes.add(new Opcode(0x90, "BCC", 2, 2 /* +1 if branch succeds +2 if to a new page */, AddressingMode.NoneAddressing));
-        opcodes.add(new Opcode(0xB0, "BCS", 2, 2 /* +1 if branch succeds +2 if to a new page */, AddressingMode.NoneAddressing));
-        opcodes.add(new Opcode(0xF0, "BEQ", 2, 2 /* +1 if branch succeds +2 if to a new page */, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0x90, "BCC", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0xB0, "BCS", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0xF0, "BEQ", 2, 2 /* +1 if branch succeds +2 if to a new page */));
 
         opcodes.add(new Opcode(0xA9, "LDA", 2, 2, AddressingMode.Immediate));
         opcodes.add(new Opcode(0xA5, "LDA", 2, 3, AddressingMode.ZeroPage));
@@ -54,8 +54,8 @@ public class Opcode {
         opcodes.add(new Opcode(0x81, "STA", 2, 6, AddressingMode.IndirectX));
         opcodes.add(new Opcode(0x91, "STA", 2, 6, AddressingMode.IndirectY));
 
-        opcodes.add(new Opcode(0xAA, "TAX", 1, 2, AddressingMode.NoneAddressing));
-        opcodes.add(new Opcode(0xE8, "INX", 1, 2, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0xAA, "TAX", 1, 2));
+        opcodes.add(new Opcode(0xE8, "INX", 1, 2));
     }
 
     private int code;
@@ -70,6 +70,14 @@ public class Opcode {
         this.length = length;
         this.cycles = cycles;
         this.mode = mode;
+    }
+
+    protected Opcode(int code, String mnemonic, int length, int cycles) {
+        this.code = code;
+        this.mnemonic = mnemonic;
+        this.length = length;
+        this.cycles = cycles;
+        this.mode = AddressingMode.NoneAddressing;
     }
 
     public static HashMap<Short, Opcode> getOpcodesMap() {
