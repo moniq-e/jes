@@ -9,6 +9,34 @@ public class Opcode {
     static {
         opcodes.add(new Opcode(0x00, "BRK", 1, 7, AddressingMode.NoneAddressing));
 
+        opcodes.add(new Opcode(0x69, "ADC", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0x65, "ADC", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x75, "ADC", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x6D, "ADC", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x7D, "ADC", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+        opcodes.add(new Opcode(0x79, "ADC", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+        opcodes.add(new Opcode(0x61, "ADC", 2, 6, AddressingMode.IndirectX));
+        opcodes.add(new Opcode(0x71, "ADC", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0x29, "AND", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0x25, "AND", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x35, "AND", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x2D, "AND", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x3D, "AND", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+        opcodes.add(new Opcode(0x39, "AND", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+        opcodes.add(new Opcode(0x21, "AND", 2, 6, AddressingMode.IndirectX));
+        opcodes.add(new Opcode(0x31, "AND", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0x0A, "ASL", 1, 2, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0x06, "ASL", 2, 5, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x16, "ASL", 2, 6, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x0E, "ASL", 3, 6, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x1E, "ASL", 3, 7, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0x90, "BCC", 2, 2 /* +1 if branch succeds +2 if to a new page */, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0xB0, "BCS", 2, 2 /* +1 if branch succeds +2 if to a new page */, AddressingMode.NoneAddressing));
+        opcodes.add(new Opcode(0xF0, "BEQ", 2, 2 /* +1 if branch succeds +2 if to a new page */, AddressingMode.NoneAddressing));
+
         opcodes.add(new Opcode(0xA9, "LDA", 2, 2, AddressingMode.Immediate));
         opcodes.add(new Opcode(0xA5, "LDA", 2, 3, AddressingMode.ZeroPage));
         opcodes.add(new Opcode(0xB5, "LDA", 2, 4, AddressingMode.ZeroPageX));

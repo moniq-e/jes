@@ -55,6 +55,44 @@ public class CPU {
             switch (code) {
                 case 0x00: //BRK
                     return;
+                case 0x69: //ADC
+                case 0x65:
+                case 0x75:
+                case 0x6D:
+                case 0x7D:
+                case 0x79:
+                case 0x61:
+                case 0x71:
+                    adc(opcode.getMode());
+                    break;
+                case 0x29: //AND
+                case 0x25:
+                case 0x35:
+                case 0x2D:
+                case 0x3D:
+                case 0x39:
+                case 0x21:
+                case 0x31:
+                    and(opcode.getMode());
+                    break;
+                case 0x0A: //ASL
+                    asl_accumulator();
+                    break;
+                case 0x06:
+                case 0x16:
+                case 0x0E:
+                case 0x1E:
+                    asl(opcode.getMode());
+                    break;
+                case 0x90: //BCC
+                    branch((pstatus & 0x1) == 0);
+                    break;
+                case 0xB0: //BCS
+                    branch((pstatus & 0x1) != 0);
+                    break;
+                case 0xF0: //BEQ
+                    branch((pstatus & 0x2) != 0);
+                    break;
                 case 0xA9: //LDA
                 case 0xA5:
                 case 0xB5:
@@ -89,6 +127,45 @@ public class CPU {
             if (pcState == pc) {
                 incPC(opcode.getLength() - 1);
             }
+        }
+    }
+
+    public void adc(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        var result = acc + value + (pstatus & 0x1);
+        setStatusFlag(Flag.C, result > 0xFF);
+        setStatusFlag(Flag.V, ((result ^ value) & (acc ^ result) & 0x80) != 0);
+        setAcc(result);
+        updateZNFlags(acc);
+    }
+
+    public void and(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setAcc(acc & value);
+        updateZNFlags(acc);
+    }
+
+    public void asl_accumulator() {
+        setStatusFlag(Flag.C, (acc & 0x80) != 0);
+        setAcc(acc << 1);
+        updateZNFlags(acc);
+    }
+
+    public void asl(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, (value & 0x80) != 0);
+        value <<= 1;
+        memWrite(addr, value);
+        updateZNFlags(value);
+    }
+
+    public void branch(boolean condition) {
+        if (condition) {
+            var jump = (byte) memRead(pc);
+            incPC(1 + (jump & 0xFFFF));
         }
     }
 
