@@ -126,9 +126,117 @@ public class CPU {
                     setIry(iry - 1);
                     updateZNFlags(iry);
                 }
+                //EOR
+                case 0x49, 0x45, 0x55, 0x4D, 0x5D, 0x59, 0x41, 0x51 -> {
+                    eor(opcode.getMode());
+                }
+                //INC
+                case 0xE6, 0xF6, 0xEE, 0xFE -> {
+                    inc(opcode.getMode());
+                }
+                //INX
+                case 0xE8 -> {
+                    setIrx(irx + 1);
+                    updateZNFlags(irx);
+                }
+                //INY
+                case 0xC8 -> {
+                    setIry(iry + 1);
+                    updateZNFlags(iry);
+                }
+                //JMP
+                case 0x4C -> {
+                    pc = memRead16(pc);
+                }
+                //JMP Indirect
+                case 0x6C -> {
+                    var addr = memRead16(pc);
+                    
+                    int indirectAddr;
+                    if ((addr & 0x00FF) == 0x00FF) {
+                        var lo = memRead(addr);
+                        var hi = memRead(addr & 0xFF00);
+                        indirectAddr = (hi << 8) | lo;
+                    } else {
+                        indirectAddr = memRead16(addr);
+                    }
+
+                    pc = indirectAddr;
+                }
+                //JSR
+                case 0x20 -> {
+                    stackPush16(pc + 1);
+                    var addr = memRead16(pc);
+                    pc = addr;
+                }
                 //LDA
                 case 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xA1, 0xB1 -> {
                     lda(opcode.getMode());
+                }
+                //LDX
+                case 0xA2, 0xA6, 0xB6, 0xAE, 0xBE -> {
+                    ldx(opcode.getMode());
+                }
+                //LDY
+                case 0xA0, 0xA4, 0xB4, 0xAC, 0xBC -> {
+                    ldy(opcode.getMode());
+                }
+                //LSR Accumulator
+                case 0x4A -> {
+                    setStatusFlag(Flag.C, (acc & 0x1) != 0);
+                    setAcc(acc >> 1);
+                    updateZNFlags(acc);
+                }
+                //LSR
+                case 0x46, 0x56, 0x4E, 0x5E -> {
+                    lsr(opcode.getMode());
+                }
+                //NOP
+                case 0xEA -> { }
+                //ORA
+                case 0x09, 0x05, 0x15, 0x0D, 0x1D, 0x19, 0x01, 0x11 -> {
+                    setAcc(acc | memRead(getOperandAddr(opcode.getMode())));
+                    updateZNFlags(acc);
+                }
+                //PHA
+                case 0x48 -> stackPush(acc);
+                //PHP
+                case 0x08 -> stackPush(pstatus);
+                //PLA
+                case 0x68 -> {
+                    setAcc(stackPop());
+                    updateZNFlags(acc);
+                }
+                //PLP
+                case 0x28 -> {
+                    pstatus = stackPop();
+                }
+                //ROL Accumulator
+                case 0x2A -> {
+                    var carry = (pstatus & 0x1) != 0;
+                    setStatusFlag(Flag.C, (acc & 0x80) != 0);
+                    setAcc((acc << 1) | (carry ? 1 : 0));
+                    updateZNFlags(acc);
+                }
+                //ROL
+                case 0x26, 0x36, 0x2E, 0x3E -> {
+                    rol(opcode.getMode());
+                }
+                //ROR Accumulator
+                case 0x6A -> {
+                    var carry = (pstatus & 0x1) != 0;
+                    setStatusFlag(Flag.C, (acc & 0x1) != 0);
+                    setAcc((acc >> 1) | (carry ? 0x80 : 0));
+                    updateZNFlags(acc);
+                }
+                //ROR
+                case 0x66, 0x76, 0x6E, 0x7E -> {
+                    ror(opcode.getMode());
+                }
+                //RTI
+                case 0x40 -> {
+                    pstatus = stackPop();
+                    pc = stackPop16();
                 }
                 //STA
                 case 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 -> {
@@ -139,10 +247,10 @@ public class CPU {
                     setIrx(acc);
                     updateZNFlags(irx);
                 }
-                //INX
-                case 0xE8 -> {
-                    setIrx(irx + 1);
-                    updateZNFlags(irx);
+                //TAY
+                case 0xA8 -> {
+                    setIry(acc);
+                    updateZNFlags(iry);
                 }
                 default -> {
                     throw new IllegalArgumentException("Invalid opcode (" + code + ")");
@@ -230,15 +338,91 @@ public class CPU {
         updateZNFlags(value);
     }
 
+    public void eor(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setAcc(acc ^ value);
+        updateZNFlags(acc);
+    }
+
+    public void inc(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        memWrite(addr, ++value);
+        updateZNFlags(value);
+    }
+
     public void lda(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         setAcc(memRead(addr));
         updateZNFlags(acc);
     }
 
+    public void ldx(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        setIrx(memRead(addr));
+        updateZNFlags(irx);
+    }
+
+    public void ldy(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        setIry(memRead(addr));
+        updateZNFlags(iry);
+    }
+
+    public void lsr(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, (value & 0x1) != 0);
+        value >>= 1;
+        memWrite(addr, value);
+        updateZNFlags(value);
+    }
+
+    public void rol(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        var carry = (pstatus & 0x1) != 0;
+        setStatusFlag(Flag.C, (value & 0x80) != 0);
+        value = (short) ((value << 1) | (carry ? 1 : 0));
+        memWrite(addr, value);
+        updateZNFlags(value);
+    }
+
+    public void ror(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        var carry = (pstatus & 0x1) != 0;
+        setStatusFlag(Flag.C, (value & 0x1) != 0);
+        value = (short) ((value >> 1) | (carry ? 0x80 : 0));
+        memWrite(addr, value);
+        updateZNFlags(value);
+    }
+
     public void sta(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         memWrite(addr, acc);
+    }
+
+    public short stackPop() {
+        sp = (short) ((sp + 1) & 0xFF);
+        return memRead(0x100 + sp);
+    }
+
+    public int stackPop16() {
+        var lo = stackPop();
+        var hi = stackPop();
+        return ((hi << 8) | lo);
+    }
+
+    public void stackPush(short value) {
+        memWrite(0x100 + sp, value);
+        sp = (short) ((sp - 1) & 0xFF);
+    }
+
+    public void stackPush16(int value) {
+        stackPush((short) ((value >> 8) & 0xFF));
+        stackPush((short) (value & 0xFF));
     }
 
     public short memRead(int addr) {

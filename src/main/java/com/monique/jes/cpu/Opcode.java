@@ -74,6 +74,28 @@ public class Opcode {
         opcodes.add(new Opcode(0xCA, "DEX", 1, 2));
         opcodes.add(new Opcode(0x88, "DEY", 1, 2));
 
+        opcodes.add(new Opcode(0x49, "EOR", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0x45, "EOR", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x55, "EOR", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x4D, "EOR", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x5D, "EOR", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+        opcodes.add(new Opcode(0x59, "EOR", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+        opcodes.add(new Opcode(0x41, "EOR", 2, 6, AddressingMode.IndirectX));
+        opcodes.add(new Opcode(0x51, "EOR", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0xE6, "INC", 2, 5, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xF6, "INC", 2, 6, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0xEE, "INC", 3, 6, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0xFE, "INC", 3, 7, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0xE8, "INX", 1, 2));
+        opcodes.add(new Opcode(0xC8, "INY", 1, 2));
+
+        opcodes.add(new Opcode(0x4C, "JMP", 3, 3, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x6C, "JMP", 3, 5)); // Indirect
+
+        opcodes.add(new Opcode(0x20, "JSR", 3, 6));
+
         opcodes.add(new Opcode(0xA9, "LDA", 2, 2, AddressingMode.Immediate));
         opcodes.add(new Opcode(0xA5, "LDA", 2, 3, AddressingMode.ZeroPage));
         opcodes.add(new Opcode(0xB5, "LDA", 2, 4, AddressingMode.ZeroPageX));
@@ -82,6 +104,55 @@ public class Opcode {
         opcodes.add(new Opcode(0xB9, "LDA", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
         opcodes.add(new Opcode(0xA1, "LDA", 2, 6, AddressingMode.IndirectX));
         opcodes.add(new Opcode(0xB1, "LDA", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0xA2, "LDX", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0xA6, "LDX", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xB6, "LDX", 2, 4, AddressingMode.ZeroPageY));
+        opcodes.add(new Opcode(0xAE, "LDX", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0xBE, "LDX", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+
+        opcodes.add(new Opcode(0xA0, "LDY", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0xA4, "LDY", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xB4, "LDY", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0xAC, "LDY", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0xBC, "LDY", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0x4A, "LSR", 1, 2));
+        opcodes.add(new Opcode(0x46, "LSR", 2, 5, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x56, "LSR", 2, 6, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x4E, "LSR", 3, 6, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x5E, "LSR", 3, 7, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0xEA, "NOP", 1, 2));
+
+        opcodes.add(new Opcode(0x09, "ORA", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0x05, "ORA", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x15, "ORA", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x0D, "ORA", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x1D, "ORA", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+        opcodes.add(new Opcode(0x19, "ORA", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+        opcodes.add(new Opcode(0x01, "ORA", 2, 6, AddressingMode.IndirectX));
+        opcodes.add(new Opcode(0x11, "ORA", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0x48, "PHA", 1, 3));
+        opcodes.add(new Opcode(0x08, "PHP", 1, 3));
+
+        opcodes.add(new Opcode(0x68, "PLA", 1, 4));
+        opcodes.add(new Opcode(0x28, "PLP", 1, 4));
+
+        opcodes.add(new Opcode(0x2A, "ROL", 1, 2));
+        opcodes.add(new Opcode(0x26, "ROL", 2, 5, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x36, "ROL", 2, 6, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x2E, "ROL", 3, 6, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x3E, "ROL", 3, 7, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0x6A, "ROR", 1, 2));
+        opcodes.add(new Opcode(0x66, "ROR", 2, 5, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x76, "ROR", 2, 6, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x6E, "ROR", 3, 6, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x7E, "ROR", 3, 7, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0x40, "RTI", 1, 6));
 
         opcodes.add(new Opcode(0x85, "STA", 2, 3, AddressingMode.ZeroPage));
         opcodes.add(new Opcode(0x95, "STA", 2, 4, AddressingMode.ZeroPageX));
@@ -92,6 +163,7 @@ public class Opcode {
         opcodes.add(new Opcode(0x91, "STA", 2, 6, AddressingMode.IndirectY));
 
         opcodes.add(new Opcode(0xAA, "TAX", 1, 2));
+        opcodes.add(new Opcode(0xA8, "TAY", 1, 2));
         opcodes.add(new Opcode(0xE8, "INX", 1, 2));
     }
 
