@@ -56,6 +56,7 @@ public class CPU {
             switch (code) {
                 //BRK
                 case 0x00 -> {
+                    //setStatusFlag(Flag.B, true);
                     return;
                 }
                 //ADC
@@ -77,6 +78,54 @@ public class CPU {
                 case 0xB0 -> branch((pstatus & 0x1) != 0);
                 //BEQ
                 case 0xF0 -> branch((pstatus & 0x2) != 0);
+                //BIT
+                case 0x24, 0x2C -> {
+                    bit(opcode.getMode());
+                }
+                //BMI
+                case 0x30 -> branch((pstatus & 0x80) != 0);
+                //BNE
+                case 0xD0 -> branch((pstatus & 0x2) == 0);
+                //BPL
+                case 0x10 -> branch((pstatus & 0x80) == 0);
+                //BVC
+                case 0x50 -> branch((pstatus & 0x40) == 0);
+                //BVS
+                case 0x70 -> branch((pstatus & 0x40) != 0);
+                //CLC
+                case 0x18 -> setStatusFlag(Flag.C, false);
+                //CLD
+                case 0xD8 -> setStatusFlag(Flag.D, false);
+                //CLI
+                case 0x58 -> setStatusFlag(Flag.I, false);
+                //CLV
+                case 0xB8 -> setStatusFlag(Flag.V, false);
+                //CMP
+                case 0xC9, 0xC5, 0xD5, 0xCD, 0xDD, 0xD9, 0xC1, 0xD1 -> {
+                    cmp(opcode.getMode());
+                }
+                //CPX
+                case 0xE0, 0xE4, 0xEC -> {
+                    cpx(opcode.getMode());
+                }
+                //CPY
+                case 0xC0, 0xC4, 0xCC -> {
+                    cpy(opcode.getMode());
+                }
+                //DEC
+                case 0xC6, 0xD6, 0xCE, 0xDE -> {
+                    dec(opcode.getMode());
+                }
+                //DEX
+                case 0xCA -> {
+                    setIrx(irx - 1);
+                    updateZNFlags(irx);
+                }
+                //DEY
+                case 0x88 -> {
+                    setIry(iry - 1);
+                    updateZNFlags(iry);
+                }
                 //LDA
                 case 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xA1, 0xB1 -> {
                     lda(opcode.getMode());
@@ -143,6 +192,42 @@ public class CPU {
             var jump = (byte) memRead(pc);
             incPC(1 + (jump & 0xFFFF));
         }
+    }
+
+    public void bit(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.Z, (acc & value) == 0);
+        setStatusFlag(Flag.N, (value & 0x80) != 0);
+        setStatusFlag(Flag.V, (value & 0x40) != 0);
+    }
+
+    public void cmp(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, acc >= value);
+        updateZNFlags((short) (acc - value));
+    }
+
+    public void cpx(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, irx >= value);
+        updateZNFlags((short) (irx - value));
+    }
+
+    public void cpy(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, iry >= value);
+        updateZNFlags((short) (iry - value));
+    }
+
+    public void dec(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        memWrite(addr, --value);
+        updateZNFlags(value);
     }
 
     public void lda(AddressingMode mode) {
@@ -278,6 +363,10 @@ public class CPU {
 
     public void setIrx(int value) {
         irx = unsignByte(value);
+    }
+
+    public void setIry(int value) {
+        iry = unsignByte(value);
     }
 
     // Test only
