@@ -36,6 +36,43 @@ public class Opcode {
         opcodes.add(new Opcode(0x90, "BCC", 2, 2 /* +1 if branch succeds +2 if to a new page */));
         opcodes.add(new Opcode(0xB0, "BCS", 2, 2 /* +1 if branch succeds +2 if to a new page */));
         opcodes.add(new Opcode(0xF0, "BEQ", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0x24, "BIT", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x2C, "BIT", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x30, "BMI", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0xD0, "BNE", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0x10, "BPL", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0x50, "BVC", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+        opcodes.add(new Opcode(0x70, "BVS", 2, 2 /* +1 if branch succeds +2 if to a new page */));
+
+        opcodes.add(new Opcode(0x18, "CLC", 1, 2));
+        opcodes.add(new Opcode(0xD8, "CLD", 1, 2));
+        opcodes.add(new Opcode(0x58, "CLI", 1, 2));
+        opcodes.add(new Opcode(0xB8, "CLV", 1, 2));
+
+        opcodes.add(new Opcode(0xC9, "CMP", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0xC5, "CMP", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xD5, "CMP", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0xCD, "CMP", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0xDD, "CMP", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+        opcodes.add(new Opcode(0xD9, "CMP", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+        opcodes.add(new Opcode(0xC1, "CMP", 2, 6, AddressingMode.IndirectX));
+        opcodes.add(new Opcode(0xD1, "CMP", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0xE0, "CPX", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0xE4, "CPX", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xEC, "CPX", 3, 4, AddressingMode.Absolute));
+
+        opcodes.add(new Opcode(0xC0, "CPY", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0xC4, "CPY", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xCC, "CPY", 3, 4, AddressingMode.Absolute));
+
+        opcodes.add(new Opcode(0xC6, "DEC", 2, 5, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xD6, "DEC", 2, 6, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0xCE, "DEC", 3, 6, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0xDE, "DEC", 3, 7, AddressingMode.AbsoluteX));
+
+        opcodes.add(new Opcode(0xCA, "DEX", 1, 2));
+        opcodes.add(new Opcode(0x88, "DEY", 1, 2));
 
         opcodes.add(new Opcode(0xA9, "LDA", 2, 2, AddressingMode.Immediate));
         opcodes.add(new Opcode(0xA5, "LDA", 2, 3, AddressingMode.ZeroPage));

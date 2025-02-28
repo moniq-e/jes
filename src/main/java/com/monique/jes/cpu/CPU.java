@@ -55,6 +55,7 @@ public class CPU {
 
             switch (code) {
                 case 0x00: //BRK
+                    //setStatusFlag(Flag.B, true);
                     return;
                 case 0x69: //ADC
                 case 0x65:
@@ -93,6 +94,71 @@ public class CPU {
                     break;
                 case 0xF0: //BEQ
                     branch((pstatus & 0x2) != 0);
+                    break;
+                case 0x24: //BIT
+                case 0x2C:
+                    bit(opcode.getMode());
+                    break;
+                case 0x30: //BMI
+                    branch((pstatus & 0x80) != 0);
+                    break;
+                case 0xD0: //BNE
+                    branch((pstatus & 0x2) == 0);
+                    break;
+                case 0x10: //BPL
+                    branch((pstatus & 0x80) == 0);
+                    break;
+                case 0x50: //BVC
+                    branch((pstatus & 0x40) == 0);
+                    break;
+                case 0x70: //BVS
+                    branch((pstatus & 0x40) != 0);
+                    break;
+                case 0x18: //CLC
+                    setStatusFlag(Flag.C, false);
+                    break;
+                case 0xD8: //CLD
+                    setStatusFlag(Flag.D, false);
+                    break;
+                case 0x58: //CLI
+                    setStatusFlag(Flag.I, false);
+                    break;
+                case 0xB8: //CLV
+                    setStatusFlag(Flag.V, false);
+                    break;
+                case 0xC9: //CMP
+                case 0xC5:
+                case 0xD5:
+                case 0xCD:
+                case 0xDD:
+                case 0xD9:
+                case 0xC1:
+                case 0xD1:
+                    cmp(opcode.getMode());
+                    break;
+                case 0xE0: //CPX
+                case 0xE4:
+                case 0xEC:
+                    cpx(opcode.getMode());
+                    break;
+                case 0xC0: //CPY
+                case 0xC4:
+                case 0xCC:
+                    cpy(opcode.getMode());
+                    break;
+                case 0xC6: //DEC
+                case 0xD6:
+                case 0xCE:
+                case 0xDE:
+                    dec(opcode.getMode());
+                    break;
+                case 0xCA: //DEX
+                    setIrx(irx - 1);
+                    updateZNFlags(irx);
+                    break;
+                case 0x88: //DEY
+                    setIry(iry - 1);
+                    updateZNFlags(iry);
                     break;
                 case 0xA9: //LDA
                 case 0xA5:
@@ -168,6 +234,42 @@ public class CPU {
             var jump = (byte) memRead(pc);
             incPC(1 + (jump & 0xFFFF));
         }
+    }
+
+    public void bit(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.Z, (acc & value) == 0);
+        setStatusFlag(Flag.N, (value & 0x80) != 0);
+        setStatusFlag(Flag.V, (value & 0x40) != 0);
+    }
+
+    public void cmp(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, acc >= value);
+        updateZNFlags((short) (acc - value));
+    }
+
+    public void cpx(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, irx >= value);
+        updateZNFlags((short) (irx - value));
+    }
+
+    public void cpy(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        setStatusFlag(Flag.C, iry >= value);
+        updateZNFlags((short) (iry - value));
+    }
+
+    public void dec(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        var value = memRead(addr);
+        memWrite(addr, --value);
+        updateZNFlags(value);
     }
 
     public void lda(AddressingMode mode) {
@@ -303,6 +405,10 @@ public class CPU {
 
     public void setIrx(int value) {
         irx = unsignByte(value);
+    }
+
+    public void setIry(int value) {
+        iry = unsignByte(value);
     }
 
     // Test only
