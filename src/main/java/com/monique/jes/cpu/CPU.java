@@ -54,75 +54,50 @@ public class CPU {
             var opcode = opcodes.get(code);
 
             switch (code) {
-                case 0x00: //BRK
+                //BRK
+                case 0x00 -> {
                     return;
-                case 0x69: //ADC
-                case 0x65:
-                case 0x75:
-                case 0x6D:
-                case 0x7D:
-                case 0x79:
-                case 0x61:
-                case 0x71:
+                }
+                //ADC
+                case 0x69, 0x65, 0x75, 0x6D, 0x7D, 0x79, 0x61, 0x71 -> {
                     adc(opcode.getMode());
-                    break;
-                case 0x29: //AND
-                case 0x25:
-                case 0x35:
-                case 0x2D:
-                case 0x3D:
-                case 0x39:
-                case 0x21:
-                case 0x31:
+                }
+                //AND
+                case 0x29, 0x25, 0x35, 0x2D, 0x3D, 0x39, 0x21, 0x31 -> {
                     and(opcode.getMode());
-                    break;
-                case 0x0A: //ASL
-                    asl_accumulator();
-                    break;
-                case 0x06:
-                case 0x16:
-                case 0x0E:
-                case 0x1E:
+                }
+                //ASL
+                case 0x0A -> asl_accumulator();
+                case 0x06, 0x16, 0x0E, 0x1E -> {
                     asl(opcode.getMode());
-                    break;
-                case 0x90: //BCC
-                    branch((pstatus & 0x1) == 0);
-                    break;
-                case 0xB0: //BCS
-                    branch((pstatus & 0x1) != 0);
-                    break;
-                case 0xF0: //BEQ
-                    branch((pstatus & 0x2) != 0);
-                    break;
-                case 0xA9: //LDA
-                case 0xA5:
-                case 0xB5:
-                case 0xAD:
-                case 0xBD:
-                case 0xB9:
-                case 0xA1:
-                case 0xB1:
+                }
+                //BCC
+                case 0x90 -> branch((pstatus & 0x1) == 0);
+                //BCS
+                case 0xB0 -> branch((pstatus & 0x1) != 0);
+                //BEQ
+                case 0xF0 -> branch((pstatus & 0x2) != 0);
+                //LDA
+                case 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xA1, 0xB1 -> {
                     lda(opcode.getMode());
-                    break;
-                case 0x85: //STA
-                case 0x95:
-                case 0x8D:
-                case 0x9D:
-                case 0x99:
-                case 0x81:
-                case 0x91:
+                }
+                //STA
+                case 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 -> {
                     sta(opcode.getMode());
-                    break;
-                case 0xAA: //TAX
+                }
+                //TAX
+                case 0xAA -> {
                     setIrx(acc);
                     updateZNFlags(irx);
-                    break;
-                case 0xE8: //INX
+                }
+                //INX
+                case 0xE8 -> {
                     setIrx(irx + 1);
                     updateZNFlags(irx);
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                    throw new IllegalArgumentException("Invalid opcode (" + code + ")");
+                }
             }
 
             if (pcState == pc) {
