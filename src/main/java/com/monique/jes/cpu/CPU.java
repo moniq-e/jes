@@ -3,9 +3,12 @@ package com.monique.jes.cpu;
 import java.io.InputStream;
 import java.util.function.Consumer;
 
+import com.monique.jes.Bus;
+import com.monique.jes.utils.Memory;
+
 //21441960 Hz
-public class CPU {
-    protected short[] mem; // 0xFFFF bytes
+public class CPU implements Memory{
+    private Bus bus;
     private int pc; // 16 bit
     private short sp; // 8 bit
     private short acc; // 8 bit
@@ -14,20 +17,21 @@ public class CPU {
     private short iry; // 8 bit
 
     public CPU() {
-        mem = new short[0xFFFF];
+        //mem = new short[0xFFFF];
+        bus = new Bus();
         pc = 0;
-        sp = 0;
+        sp = 0xFD;
         acc = 0;
-        pstatus = 0;
+        pstatus = 0x24; // 0010 0100
         irx = 0;
         iry = 0;
     }
 
     public void reset() {
         pc = memRead16(0xFFFC);
-        sp = 0;
+        sp = 0xFD;
         acc = 0;
-        pstatus = 0;
+        pstatus = 0x24; // 0010 0100
         irx = 0;
         iry = 0;
     }
@@ -40,7 +44,7 @@ public class CPU {
 
     public void loadRom(short[] rom) {
         for (int i = 0; i < rom.length; i++) {
-            mem[i + 0x8000] = rom[i];
+            memWrite(i + 0x8000, rom[i]);
         }
         memWrite16(0xFFFC, 0x8000);
     }
@@ -49,7 +53,7 @@ public class CPU {
         try {
             int data, i = 0;
             while ((data = rom.read()) != -1) {
-                mem[i++ + 0x8000] = (short) (data);
+                memWrite(i++ + 0x8000, (short) data);
             }
             memWrite16(0xFFFC, 0x8000);
             rom.close();
@@ -497,21 +501,14 @@ public class CPU {
         stackPush((short) (value & 0xFF));
     }
 
+    @Override
     public short memRead(int addr) {
-        return (short) (mem[addr] & 0xFF);
+        return bus.memRead(addr);
     }
 
-    public int memRead16(int pos) {
-        return (memRead(pos + 1) << 8) | memRead(pos);
-    }
-
+    @Override
     public void memWrite(int addr, int value) {
-        mem[addr] = (short) (value & 0xFF);
-    }
-
-    public void memWrite16(int pos, int value) {
-        memWrite(pos, (short) (value & 0xFF));
-        memWrite(pos + 1, (short) ((value >> 8) & 0xFF));
+        bus.memWrite(addr, value);
     }
 
     public int getOperandAddr(AddressingMode mode) {

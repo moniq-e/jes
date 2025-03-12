@@ -9,7 +9,7 @@ public class SnakeGame {
             @Override
             public void loadRom(short[] rom) {
                 for (int i = 0; i < rom.length; i++) {
-                    mem[i + 0x0600] = rom[i];
+                    memWrite(i + 0x0600, rom[i]);
                 }
                 memWrite16(0xFFFC, 0x0600);
             }
