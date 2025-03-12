@@ -153,6 +153,20 @@ public class Opcode {
         opcodes.add(new Opcode(0x7E, "ROR", 3, 7, AddressingMode.AbsoluteX));
 
         opcodes.add(new Opcode(0x40, "RTI", 1, 6));
+        opcodes.add(new Opcode(0x60, "RTS", 1, 6));
+
+        opcodes.add(new Opcode(0xE9, "SBC", 2, 2, AddressingMode.Immediate));
+        opcodes.add(new Opcode(0xE5, "SBC", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0xF5, "SBC", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0xED, "SBC", 3, 4, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0xFD, "SBC", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteX));
+        opcodes.add(new Opcode(0xF9, "SBC", 3, 4 /* +1 if page crossed */, AddressingMode.AbsoluteY));
+        opcodes.add(new Opcode(0xE1, "SBC", 2, 6, AddressingMode.IndirectX));
+        opcodes.add(new Opcode(0xF1, "SBC", 2, 5 /* +1 if page crossed */, AddressingMode.IndirectY));
+
+        opcodes.add(new Opcode(0x38, "SEC", 1, 2));
+        opcodes.add(new Opcode(0xF8, "SED", 1, 2));
+        opcodes.add(new Opcode(0x78, "SEI", 1, 2));
 
         opcodes.add(new Opcode(0x85, "STA", 2, 3, AddressingMode.ZeroPage));
         opcodes.add(new Opcode(0x95, "STA", 2, 4, AddressingMode.ZeroPageX));
@@ -162,8 +176,21 @@ public class Opcode {
         opcodes.add(new Opcode(0x81, "STA", 2, 6, AddressingMode.IndirectX));
         opcodes.add(new Opcode(0x91, "STA", 2, 6, AddressingMode.IndirectY));
 
+        opcodes.add(new Opcode(0x86, "STX", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x96, "STX", 2, 4, AddressingMode.ZeroPageY));
+        opcodes.add(new Opcode(0x8E, "STX", 3, 4, AddressingMode.Absolute));
+
+        opcodes.add(new Opcode(0x84, "STY", 2, 3, AddressingMode.ZeroPage));
+        opcodes.add(new Opcode(0x94, "STY", 2, 4, AddressingMode.ZeroPageX));
+        opcodes.add(new Opcode(0x8C, "STY", 3, 4, AddressingMode.Absolute));
+
         opcodes.add(new Opcode(0xAA, "TAX", 1, 2));
         opcodes.add(new Opcode(0xA8, "TAY", 1, 2));
+        opcodes.add(new Opcode(0xBA, "TSX", 1, 2));
+        opcodes.add(new Opcode(0x8A, "TXA", 1, 2));
+        opcodes.add(new Opcode(0x9A, "TXS", 1, 2));
+        opcodes.add(new Opcode(0x98, "TYA", 1, 2));
+
         opcodes.add(new Opcode(0xE8, "INX", 1, 2));
     }
 

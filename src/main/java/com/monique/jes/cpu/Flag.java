@@ -4,6 +4,7 @@ public enum Flag {
     N,
     V,
     B,
+    B2,
     D,
     I,
     Z, 

@@ -201,7 +201,9 @@ public class CPU {
                 //PHA
                 case 0x48 -> stackPush(acc);
                 //PHP
-                case 0x08 -> stackPush(pstatus);
+                case 0x08 -> {
+                    stackPush((short) (pstatus | 0x30));
+                }
                 //PLA
                 case 0x68 -> {
                     setAcc(stackPop());
@@ -210,6 +212,8 @@ public class CPU {
                 //PLP
                 case 0x28 -> {
                     pstatus = stackPop();
+                    setStatusFlag(Flag.B, false);
+                    setStatusFlag(Flag.B2, true); 
                 }
                 //ROL Accumulator
                 case 0x2A -> {
@@ -236,11 +240,38 @@ public class CPU {
                 //RTI
                 case 0x40 -> {
                     pstatus = stackPop();
+                    setStatusFlag(Flag.B, false);
+                    setStatusFlag(Flag.B2, true); 
                     pc = stackPop16();
                 }
+                //RTS
+                case 0x60 -> {
+                    pc = stackPop16();
+                    incPC();
+                }
+                //SBC
+                case 0xE9, 0xE5, 0xF5, 0xED, 0xFD, 0xF9, 0xE1, 0xF1 -> {
+                    sbc(opcode.getMode());
+                }
+                //SEC
+                case 0x38 -> setStatusFlag(Flag.C, true);
+                //SED
+                case 0xF8 -> setStatusFlag(Flag.D, true);
+                //SEI
+                case 0x78 -> setStatusFlag(Flag.I, true);
                 //STA
                 case 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 -> {
                     sta(opcode.getMode());
+                }
+                //STX
+                case 0x86, 0x96, 0x8E -> {
+                    var addr = getOperandAddr(opcode.getMode());
+                    memWrite(addr, irx);
+                }
+                //STY
+                case 0x84, 0x94, 0x8C -> {
+                    var addr = getOperandAddr(opcode.getMode());
+                    memWrite(addr, iry);
                 }
                 //TAX
                 case 0xAA -> {
@@ -251,6 +282,23 @@ public class CPU {
                 case 0xA8 -> {
                     setIry(acc);
                     updateZNFlags(iry);
+                }
+                //TSX
+                case 0xBA -> {
+                    setIrx(sp);
+                    updateZNFlags(irx);
+                }
+                //TXA
+                case 0x8A -> {
+                    setAcc(irx);
+                    updateZNFlags(acc);
+                }
+                //TXS
+                case 0x9A -> setSp(irx);
+                //TYA
+                case 0x98 -> {
+                    setAcc(iry);
+                    updateZNFlags(acc);
                 }
                 default -> {
                     throw new IllegalArgumentException("Invalid opcode (" + code + ")");
@@ -266,11 +314,7 @@ public class CPU {
     public void adc(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        var result = acc + value + (pstatus & 0x1);
-        setStatusFlag(Flag.C, result > 0xFF);
-        setStatusFlag(Flag.V, ((result ^ value) & (acc ^ result) & 0x80) != 0);
-        setAcc(result);
-        updateZNFlags(acc);
+        addToAcc(value);
     }
 
     public void and(AddressingMode mode) {
@@ -399,6 +443,12 @@ public class CPU {
         updateZNFlags(value);
     }
 
+    public void sbc(AddressingMode mode) {
+        var addr = getOperandAddr(mode);
+        byte value = (byte) memRead(addr);
+        addToAcc((short) (((~value) - 1) & 0xFF));
+    }
+
     public void sta(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         memWrite(addr, acc);
@@ -484,6 +534,13 @@ public class CPU {
                     pstatus &= 0xBF;
                 }
                 break;
+            case B2: // 0010 0000
+                if (value) {
+                    pstatus |= 0x20;
+                } else {
+                    pstatus &= 0xDF;
+                }
+                break;
             case B: // 0001 0000
                 if (value) {
                     pstatus |= 0x10;
@@ -541,6 +598,14 @@ public class CPU {
         pc = (pc + value) & 0xFFFF;
     }
 
+    public void addToAcc(short value) {
+        var result = acc + value + (pstatus & 0x1);
+        setStatusFlag(Flag.C, result > 0xFF);
+        setStatusFlag(Flag.V, ((result ^ value) & (acc ^ result) & 0x80) != 0);
+        setAcc(result);
+        updateZNFlags(acc);
+    }
+
     public void setAcc(int value) {
         acc = unsignByte(value);
     }
@@ -551,6 +616,10 @@ public class CPU {
 
     public void setIry(int value) {
         iry = unsignByte(value);
+    }
+
+    public void setSp(int value) {
+        sp = unsignByte(value);
     }
 
     // Test only
