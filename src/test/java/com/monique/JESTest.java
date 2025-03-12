@@ -4,13 +4,14 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.monique.jes.Bus;
 import com.monique.jes.cpu.CPU;
 
 public class JESTest {
 
     @Test
     public void testImmediateLDA() {
-        var cpu = new CPU();
+        var cpu = new CPU(new Bus(null));
         cpu.loadAndRun(new short[]{0xA9, 0x05, 0x00});
 
         assertEquals(cpu.getAcc(), 0x05);
@@ -20,7 +21,7 @@ public class JESTest {
 
     @Test
     public void testLDAZeroFlag() {
-        var cpu = new CPU();
+        var cpu = new CPU(new Bus(null));
         cpu.loadAndRun(new short[]{0xA9, 0x00, 0x00});
 
         assertEquals((cpu.getStatus() & 0x2), 0x2);
@@ -28,7 +29,7 @@ public class JESTest {
 
     @Test
     public void testLDAFromMemory() {
-        var cpu = new CPU();
+        var cpu = new CPU(new Bus(null));
         cpu.memWrite(0x10, 0x55);
         cpu.loadAndRun(new short[]{0xA5, 0x10, 0x00});
 
@@ -37,7 +38,7 @@ public class JESTest {
 
     @Test
     public void testTAX() {
-        var cpu = new CPU();
+        var cpu = new CPU(new Bus(null));
         cpu.loadRom(new short[]{0xAA, 0x00});
         cpu.reset();
         cpu.setAcc((short) 0xA);
@@ -48,7 +49,7 @@ public class JESTest {
 
     @Test
     public void test5OpsWorkingTogether() {
-        var cpu = new CPU();
+        var cpu = new CPU(new Bus(null));
         cpu.loadAndRun(new short[]{0xA9, 0xC0, 0xAA, 0xE8, 0x00});
 
         assertEquals(cpu.getIrx(), 0xC1);
@@ -56,7 +57,7 @@ public class JESTest {
 
     @Test
     public void testInxOverflow() {
-        var cpu = new CPU();
+        var cpu = new CPU(new Bus(null));
         cpu.loadRom(new short[]{0xE8, 0xE8, 0x00});
         cpu.reset();
         cpu.setIrx((short) 0xFF);

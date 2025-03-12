@@ -16,9 +16,9 @@ public class CPU implements Memory{
     private short irx; // 8 bit
     private short iry; // 8 bit
 
-    public CPU() {
+    public CPU(Bus bus) {
         //mem = new short[0xFFFF];
-        bus = new Bus();
+        this.bus = bus;
         pc = 0;
         sp = 0xFD;
         acc = 0;
