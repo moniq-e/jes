@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 //21441960 Hz
 public class CPU {
-    private short[] mem; // 0xFFFF bytes
+    protected short[] mem; // 0xFFFF bytes
     private int pc; // 16 bit
     private short sp; // 8 bit
     private short acc; // 8 bit
@@ -58,15 +58,8 @@ public class CPU {
         }
     }
 
-    public void loadSnakeRom(short[] rom) {
-        for (int i = 0; i < rom.length; i++) {
-            mem[i + 0x0600] = rom[i];
-        }
-        memWrite16(0xFFFC, 0x0600);
-    }
-
     public void run() {
-        runWithCallback((cpu) -> {});
+        runWithCallback(cpu -> {});
     }
 
     public void runWithCallback(Consumer<CPU> callback) {
@@ -85,7 +78,7 @@ public class CPU {
             switch (code) {
                 //BRK
                 case 0x00 -> {
-                    //setStatusFlag(Flag.B, true);
+                    setStatusFlag(Flag.B, true);
                     return;
                 }
                 //ADC
