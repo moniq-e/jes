@@ -1,5 +1,8 @@
 package com.monique.jes.cpu;
 
+import java.io.InputStream;
+import java.util.function.Consumer;
+
 //21441960 Hz
 public class CPU {
     private short[] mem; // 0xFFFF bytes
@@ -42,10 +45,36 @@ public class CPU {
         memWrite16(0xFFFC, 0x8000);
     }
 
+    public void loadRom(InputStream rom) {
+        try {
+            int data, i = 0;
+            while ((data = rom.read()) != -1) {
+                mem[i++ + 0x8000] = (short) (data);
+            }
+            memWrite16(0xFFFC, 0x8000);
+            rom.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadSnakeRom(short[] rom) {
+        for (int i = 0; i < rom.length; i++) {
+            mem[i + 0x0600] = rom[i];
+        }
+        memWrite16(0xFFFC, 0x0600);
+    }
+
     public void run() {
+        runWithCallback((cpu) -> {});
+    }
+
+    public void runWithCallback(Consumer<CPU> callback) {
         var opcodes = Opcode.getOpcodesMap();
 
         while (true) {
+            callback.accept(this);
+
             var code = memRead(pc);
             incPC();
 
