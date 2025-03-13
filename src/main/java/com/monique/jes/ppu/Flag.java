@@ -1,0 +1,12 @@
+package com.monique.jes.ppu;
+
+public enum Flag {
+    NAMETABLE1,
+    NAMETABLE2,
+    VRAM_ADD_INCREMENT,
+    SPRITE_PATTERN_ADDR,
+    BACKGROUND_PATTERN_ADDR,
+    SPRITE_SIZE,
+    MASTER_SLAVE_SELECT,
+    GENERATE_NMI,
+}

@@ -1,6 +1,8 @@
 package com.monique.jes.ppu;
 
 import com.monique.jes.utils.Pair;
+import static com.monique.jes.utils.Unsign.unsignShort;
+import static com.monique.jes.utils.Unsign.unsignByte;
 
 public class AddrRegister {
     private Pair value;
@@ -48,25 +50,5 @@ public class AddrRegister {
 
     public void resetLatch() {
         hiPtr = true;
-    }
-
-    /**
-     * Unsign a short
-     * 
-     * @param signed
-     * @return unsigned short
-     */
-    private int unsignShort(int signed) {
-        return signed & 0xFFFF;
-    }
-
-    /**
-     * Unsign a byte
-     * 
-     * @param signed
-     * @return unsigned byte
-     */
-    private short unsignByte(int signed) {
-        return (short) (signed & 0xFF);
     }
 }

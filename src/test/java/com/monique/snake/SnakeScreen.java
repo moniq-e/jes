@@ -45,10 +45,10 @@ public class SnakeScreen {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
         frame.addKeyListener(new SnakeInput(cpu));
         frame.add(panel);
         frame.pack();
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
