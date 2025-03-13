@@ -65,4 +65,9 @@ public class PPU {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'writeToScroll'");
     }
+
+    public void writeOamDma(short[] buffer) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeOamDma'");
+    }
 }

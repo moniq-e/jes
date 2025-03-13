@@ -1,5 +1,6 @@
 package com.monique.jes;
 
+import com.monique.jes.joypad.Joypad;
 import com.monique.jes.ppu.PPU;
 import com.monique.jes.utils.Memory;
 import com.monique.jes.utils.Rom;
@@ -13,11 +14,13 @@ public class Bus implements Memory {
     private short[] cpuVram; // 2048 bytes
     private Rom rom;
     private PPU ppu;
+    private Joypad joypad;
 
     public Bus(Rom rom) {
         this.rom = rom;
         cpuVram = new short[2048];
         ppu = new PPU(rom.chrRom, rom.mirroring);
+        joypad = new Joypad();
     }
 
     public short readPrgRom(int addr) {
@@ -50,6 +53,10 @@ public class Bus implements Memory {
             int mirrorDownAddr = addr & 0x2007;
             return memRead(mirrorDownAddr);
 
+        } else if (addr == 0x4016) {
+            return joypad.read();
+        } else if (addr == 0x4017) {
+            //ignoring joypad2
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             return readPrgRom(addr);
         } else {
@@ -86,10 +93,27 @@ public class Bus implements Memory {
             int mirrorDownAddr = addr & 0x2007;
             memWrite(mirrorDownAddr, value);
 
+        } else if (addr == 0x4014) {
+
+            var buffer = new short[256];
+            var hi = (value << 8);
+            for (int i = 0; i < 256; i++) {
+                buffer[i] = memRead(hi + i);
+            }
+            ppu.writeOamDma(buffer);
+
+        } else if (addr == 0x4016) {
+            joypad.write((short) (value & 0xFF));
+        } else if (addr == 0x4017) {
+            //ignoring joypad2
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             System.err.println("Attempt to write to Cartridge ROM space.");
         } else {
             System.out.printf("Ignoring mem write-access at %d\n.", addr);
         }
+    }
+
+    public Joypad getJoypad() {
+        return joypad;
     }
 }

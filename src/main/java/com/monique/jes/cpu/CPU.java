@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import com.monique.jes.Bus;
 import com.monique.jes.utils.Memory;
 import com.monique.jes.utils.Unsign;
+import com.monique.jes.utils.bitflag.BitFlag;
 
 //21441960 Hz
 public class CPU implements Memory {
@@ -14,7 +15,7 @@ public class CPU implements Memory {
     private int pc; // 16 bit
     private short sp; // 8 bit
     private short acc; // 8 bit
-    private short pstatus; // 8 bit
+    private BitFlag pstatus; // 8 bit
     private short irx; // 8 bit
     private short iry; // 8 bit
 
@@ -24,7 +25,7 @@ public class CPU implements Memory {
         pc = 0;
         sp = 0xFD;
         acc = 0;
-        pstatus = 0x24; // 0010 0100
+        pstatus = new BitFlag((short) 0x24); // 0010 0100
         irx = 0;
         iry = 0;
     }
@@ -33,7 +34,7 @@ public class CPU implements Memory {
         pc = memRead16(0xFFFC);
         sp = 0xFD;
         acc = 0;
-        pstatus = 0x24; // 0010 0100
+        pstatus.reset(); // 0010 0100
         irx = 0;
         iry = 0;
     }
@@ -92,7 +93,7 @@ public class CPU implements Memory {
             switch (code) {
                 //BRK
                 case 0x00 -> {
-                    setStatusFlag(Flag.B, true);
+                    setStatusFlag(CPUFlag.B, true);
                     System.out.println("Execution finished.");
                     return;
                 }
@@ -110,33 +111,33 @@ public class CPU implements Memory {
                     asl(opcode.getMode());
                 }
                 //BCC
-                case 0x90 -> branch((pstatus & 0x1) == 0);
+                case 0x90 -> branch((pstatus.getBits() & 0x1) == 0);
                 //BCS
-                case 0xB0 -> branch((pstatus & 0x1) != 0);
+                case 0xB0 -> branch((pstatus.getBits() & 0x1) != 0);
                 //BEQ
-                case 0xF0 -> branch((pstatus & 0x2) != 0);
+                case 0xF0 -> branch((pstatus.getBits() & 0x2) != 0);
                 //BIT
                 case 0x24, 0x2C -> {
                     bit(opcode.getMode());
                 }
                 //BMI
-                case 0x30 -> branch((pstatus & 0x80) != 0);
+                case 0x30 -> branch((pstatus.getBits() & 0x80) != 0);
                 //BNE
-                case 0xD0 -> branch((pstatus & 0x2) == 0);
+                case 0xD0 -> branch((pstatus.getBits() & 0x2) == 0);
                 //BPL
-                case 0x10 -> branch((pstatus & 0x80) == 0);
+                case 0x10 -> branch((pstatus.getBits() & 0x80) == 0);
                 //BVC
-                case 0x50 -> branch((pstatus & 0x40) == 0);
+                case 0x50 -> branch((pstatus.getBits() & 0x40) == 0);
                 //BVS
-                case 0x70 -> branch((pstatus & 0x40) != 0);
+                case 0x70 -> branch((pstatus.getBits() & 0x40) != 0);
                 //CLC
-                case 0x18 -> setStatusFlag(Flag.C, false);
+                case 0x18 -> setStatusFlag(CPUFlag.C, false);
                 //CLD
-                case 0xD8 -> setStatusFlag(Flag.D, false);
+                case 0xD8 -> setStatusFlag(CPUFlag.D, false);
                 //CLI
-                case 0x58 -> setStatusFlag(Flag.I, false);
+                case 0x58 -> setStatusFlag(CPUFlag.I, false);
                 //CLV
-                case 0xB8 -> setStatusFlag(Flag.V, false);
+                case 0xB8 -> setStatusFlag(CPUFlag.V, false);
                 //CMP
                 case 0xC9, 0xC5, 0xD5, 0xCD, 0xDD, 0xD9, 0xC1, 0xD1 -> {
                     cmp(opcode.getMode());
@@ -220,7 +221,7 @@ public class CPU implements Memory {
                 }
                 //LSR Accumulator
                 case 0x4A -> {
-                    setStatusFlag(Flag.C, (acc & 0x1) != 0);
+                    setStatusFlag(CPUFlag.C, (acc & 0x1) != 0);
                     setAcc(acc >> 1);
                     updateZNFlags(acc);
                 }
@@ -239,7 +240,7 @@ public class CPU implements Memory {
                 case 0x48 -> stackPush(acc);
                 //PHP
                 case 0x08 -> {
-                    stackPush((short) (pstatus | 0x30));
+                    stackPush((short) (pstatus.getBits() | 0x30));
                 }
                 //PLA
                 case 0x68 -> {
@@ -248,14 +249,14 @@ public class CPU implements Memory {
                 }
                 //PLP
                 case 0x28 -> {
-                    pstatus = stackPop();
-                    setStatusFlag(Flag.B, false);
-                    setStatusFlag(Flag.B2, true); 
+                    pstatus.setBits(stackPop());
+                    setStatusFlag(CPUFlag.B, false);
+                    setStatusFlag(CPUFlag.B2, true); 
                 }
                 //ROL Accumulator
                 case 0x2A -> {
-                    var carry = (pstatus & 0x1) != 0;
-                    setStatusFlag(Flag.C, (acc & 0x80) != 0);
+                    var carry = (pstatus.getBits() & 0x1) != 0;
+                    setStatusFlag(CPUFlag.C, (acc & 0x80) != 0);
                     setAcc((acc << 1) | (carry ? 1 : 0));
                     updateZNFlags(acc);
                 }
@@ -265,8 +266,8 @@ public class CPU implements Memory {
                 }
                 //ROR Accumulator
                 case 0x6A -> {
-                    var carry = (pstatus & 0x1) != 0;
-                    setStatusFlag(Flag.C, (acc & 0x1) != 0);
+                    var carry = (pstatus.getBits() & 0x1) != 0;
+                    setStatusFlag(CPUFlag.C, (acc & 0x1) != 0);
                     setAcc((acc >> 1) | (carry ? 0x80 : 0));
                     updateZNFlags(acc);
                 }
@@ -276,9 +277,9 @@ public class CPU implements Memory {
                 }
                 //RTI
                 case 0x40 -> {
-                    pstatus = stackPop();
-                    setStatusFlag(Flag.B, false);
-                    setStatusFlag(Flag.B2, true); 
+                    pstatus.setBits(stackPop());
+                    setStatusFlag(CPUFlag.B, false);
+                    setStatusFlag(CPUFlag.B2, true); 
                     pc = stackPop16();
                 }
                 //RTS
@@ -291,11 +292,11 @@ public class CPU implements Memory {
                     sbc(opcode.getMode());
                 }
                 //SEC
-                case 0x38 -> setStatusFlag(Flag.C, true);
+                case 0x38 -> setStatusFlag(CPUFlag.C, true);
                 //SED
-                case 0xF8 -> setStatusFlag(Flag.D, true);
+                case 0xF8 -> setStatusFlag(CPUFlag.D, true);
                 //SEI
-                case 0x78 -> setStatusFlag(Flag.I, true);
+                case 0x78 -> setStatusFlag(CPUFlag.I, true);
                 //STA
                 case 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 -> {
                     sta(opcode.getMode());
@@ -362,7 +363,7 @@ public class CPU implements Memory {
     }
 
     public void asl_accumulator() {
-        setStatusFlag(Flag.C, (acc & 0x80) != 0);
+        setStatusFlag(CPUFlag.C, (acc & 0x80) != 0);
         setAcc(acc << 1);
         updateZNFlags(acc);
     }
@@ -370,7 +371,7 @@ public class CPU implements Memory {
     public void asl(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        setStatusFlag(Flag.C, (value & 0x80) != 0);
+        setStatusFlag(CPUFlag.C, (value & 0x80) != 0);
         value <<= 1;
         memWrite(addr, value);
         updateZNFlags(value);
@@ -386,29 +387,29 @@ public class CPU implements Memory {
     public void bit(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        setStatusFlag(Flag.Z, (acc & value) == 0);
-        setStatusFlag(Flag.N, (value & 0x80) != 0);
-        setStatusFlag(Flag.V, (value & 0x40) != 0);
+        setStatusFlag(CPUFlag.Z, (acc & value) == 0);
+        setStatusFlag(CPUFlag.N, (value & 0x80) != 0);
+        setStatusFlag(CPUFlag.V, (value & 0x40) != 0);
     }
 
     public void cmp(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        setStatusFlag(Flag.C, acc >= value);
+        setStatusFlag(CPUFlag.C, acc >= value);
         updateZNFlags((short) (acc - value));
     }
 
     public void cpx(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        setStatusFlag(Flag.C, irx >= value);
+        setStatusFlag(CPUFlag.C, irx >= value);
         updateZNFlags((short) (irx - value));
     }
 
     public void cpy(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        setStatusFlag(Flag.C, iry >= value);
+        setStatusFlag(CPUFlag.C, iry >= value);
         updateZNFlags((short) (iry - value));
     }
 
@@ -454,7 +455,7 @@ public class CPU implements Memory {
     public void lsr(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        setStatusFlag(Flag.C, (value & 0x1) != 0);
+        setStatusFlag(CPUFlag.C, (value & 0x1) != 0);
         value >>= 1;
         memWrite(addr, value);
         updateZNFlags(value);
@@ -463,8 +464,8 @@ public class CPU implements Memory {
     public void rol(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        var carry = (pstatus & 0x1) != 0;
-        setStatusFlag(Flag.C, (value & 0x80) != 0);
+        var carry = (pstatus.getBits() & 0x1) != 0;
+        setStatusFlag(CPUFlag.C, (value & 0x80) != 0);
         value = (short) ((value << 1) | (carry ? 1 : 0));
         memWrite(addr, value);
         updateZNFlags(value);
@@ -473,8 +474,8 @@ public class CPU implements Memory {
     public void ror(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
-        var carry = (pstatus & 0x1) != 0;
-        setStatusFlag(Flag.C, (value & 0x1) != 0);
+        var carry = (pstatus.getBits() & 0x1) != 0;
+        setStatusFlag(CPUFlag.C, (value & 0x1) != 0);
         value = (short) ((value >> 1) | (carry ? 0x80 : 0));
         memWrite(addr, value);
         updateZNFlags(value);
@@ -554,72 +555,13 @@ public class CPU implements Memory {
         }
     }
 
-    public void setStatusFlag(Flag flag, boolean value) {
-        switch (flag) {
-            case N: // 1000 0000
-                if (value) {
-                    pstatus |= 0x80;
-                } else {
-                    pstatus &= 0x7F;
-                }
-                break;
-            case V: // 0100 0000
-                if (value) {
-                    pstatus |= 0x40;
-                } else {
-                    pstatus &= 0xBF;
-                }
-                break;
-            case B2: // 0010 0000
-                if (value) {
-                    pstatus |= 0x20;
-                } else {
-                    pstatus &= 0xDF;
-                }
-                break;
-            case B: // 0001 0000
-                if (value) {
-                    pstatus |= 0x10;
-                } else {
-                    pstatus &= 0xEF;
-                }
-                break;
-            case D: // 0000 1000
-                if (value) {
-                    pstatus |= 0x8;
-                } else {
-                    pstatus &= 0xF7;
-                }
-                break;
-            case I: // 0000 0100
-                if (value) {
-                    pstatus |= 0x4;
-                } else {
-                    pstatus &= 0xFB;
-                }
-                break;
-            case Z: // 0000 0010
-                if (value) {
-                    pstatus |= 0x2;
-                } else {
-                    pstatus &= 0xFD;
-                }
-                break;
-            case C: // 0000 0001
-                if (value) {
-                    pstatus |= 0x1;
-                } else {
-                    pstatus &= 0xFE;
-                }
-                break;
-            default:
-                break;
-        }
+    public void setStatusFlag(CPUFlag flag, boolean value) {
+        pstatus.setBitFlag(flag, value);
     }
 
     public void updateZNFlags(short value) {
-        setStatusFlag(Flag.Z, value == 0);
-        setStatusFlag(Flag.N, (value & 0x80) != 0);
+        setStatusFlag(CPUFlag.Z, value == 0);
+        setStatusFlag(CPUFlag.N, (value & 0x80) != 0);
     }
 
     public void incPC() {
@@ -631,9 +573,9 @@ public class CPU implements Memory {
     }
 
     public void addToAcc(short value) {
-        var result = acc + value + (pstatus & 0x1);
-        setStatusFlag(Flag.C, result > 0xFF);
-        setStatusFlag(Flag.V, ((result ^ value) & (acc ^ result) & 0x80) != 0);
+        var result = acc + value + (pstatus.getBits() & 0x1);
+        setStatusFlag(CPUFlag.C, result > 0xFF);
+        setStatusFlag(CPUFlag.V, ((result ^ value) & (acc ^ result) & 0x80) != 0);
         setAcc(result);
         updateZNFlags(acc);
     }
@@ -660,7 +602,7 @@ public class CPU implements Memory {
     }
 
     public short getStatus() {
-        return pstatus;
+        return pstatus.getBits();
     }
 
     public short getIrx() {
