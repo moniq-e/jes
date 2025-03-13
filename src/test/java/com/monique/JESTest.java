@@ -2,6 +2,7 @@ package com.monique;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 
@@ -20,19 +21,23 @@ public class JESTest implements Trace {
 
     @Test
     public void testRom() throws Exception {
+        new File("./log.txt").delete();
         var log = new FileWriter("./log.txt");
 
         var cpu = new CPU(new Bus(TEST_ROM));
         cpu.reset();
         cpu.setPC(0xC000);
-        cpu.runWithCallback(c -> {
-            try {
-                log.write(trace(c) + "\n");
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(-1);
-            }
-        });
+        try {
+            cpu.runWithCallback(c -> {
+                try {
+                    log.write(trace(c) + "\n");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
 
         log.close();
     }
@@ -40,9 +45,9 @@ public class JESTest implements Trace {
     @Test
     public void testFormatTrace() {
         var bus = new Bus(TEST_ROM);
-        bus.memWrite(100, 0xa2);
+        bus.memWrite(100, 0xA2);
         bus.memWrite(101, 0x01);
-        bus.memWrite(102, 0xca);
+        bus.memWrite(102, 0xCA);
         bus.memWrite(103, 0x88);
         bus.memWrite(104, 0x00);
 
@@ -69,10 +74,9 @@ public class JESTest implements Trace {
     public void testFormatMemAccess() {
         var bus = new Bus(TEST_ROM);
         // ORA ($33), Y
-        bus.memWrite(100, 0x11);
-        bus.memWrite(101, 0x33);
- 
- 
+        bus.memWrite(0x64, 0x11);
+        bus.memWrite(0x65, 0x33);
+
         //data
         bus.memWrite(0x33, 00);
         bus.memWrite(0x34, 04);

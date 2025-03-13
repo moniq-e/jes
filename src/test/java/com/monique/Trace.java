@@ -60,7 +60,7 @@ public interface Trace {
 
                 yield switch (opcode.getMode()) {
                     case NoneAddressing -> {
-                        if (opcode.getCode() == 0x6c) {
+                        if (opcode.getCode() == 0x6C) {
                             //jmp indirect
                             int jmpAddr; 
                             if ((address & 0x00FF) == 0x00FF) {

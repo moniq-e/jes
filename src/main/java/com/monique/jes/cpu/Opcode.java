@@ -92,7 +92,7 @@ public class Opcode {
         opcodes.add(new Opcode(0xE8, "INX", 1, 2));
         opcodes.add(new Opcode(0xC8, "INY", 1, 2));
 
-        opcodes.add(new Opcode(0x4C, "JMP", 3, 3, AddressingMode.Absolute));
+        opcodes.add(new Opcode(0x4C, "JMP", 3, 3/*, AddressingMode.Absolute*/)); // AddressingMode that acts as Immediate
         opcodes.add(new Opcode(0x6C, "JMP", 3, 5)); // Indirect
 
         opcodes.add(new Opcode(0x20, "JSR", 3, 6));

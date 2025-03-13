@@ -68,7 +68,7 @@ public class CPU implements Memory {
         runWithCallback(cpu -> {});
     }
 
-    public void runWithCallback(Consumer<CPU> callback) {
+    public void runWithCallback(Consumer<CPU> callback) throws IllegalArgumentException {
         var opcodes = Opcode.getOpcodesMap();
         var delta = DELTA_TIME;
 
@@ -93,7 +93,7 @@ public class CPU implements Memory {
                 //BRK
                 case 0x00 -> {
                     setStatusFlag(Flag.B, true);
-                    System.out.println("Break");
+                    System.out.println("Execution finished.");
                     return;
                 }
                 //ADC
@@ -338,7 +338,7 @@ public class CPU implements Memory {
                     updateZNFlags(acc);
                 }
                 default -> {
-                    throw new IllegalArgumentException("Invalid opcode (" + code + ")");
+                    throw new IllegalArgumentException(String.format("Invalid opcode (%02x).", code));
                 }
             }
 
@@ -534,21 +534,21 @@ public class CPU implements Memory {
     public int getAbsoluteAddr(AddressingMode mode, int addr) {
         switch (mode) {
             case ZeroPage:
-                return memRead(pc);
+                return memRead(addr);
             case ZeroPageX:
-                return (memRead(pc) + irx) & 0xFFFF;
+                return (memRead(addr) + irx) & 0xFFFF;
             case ZeroPageY:
-                return (memRead(pc) + iry) & 0xFFFF;
+                return (memRead(addr) + iry) & 0xFFFF;
             case Absolute:
-                return memRead16(pc);
+                return memRead16(addr);
             case AbsoluteX:
-                return (memRead16(pc) + irx) & 0xFFFF;
+                return (memRead16(addr) + irx) & 0xFFFF;
             case AbsoluteY:
-                return (memRead16(pc) + iry) & 0xFFFF;
+                return (memRead16(addr) + iry) & 0xFFFF;
             case IndirectX:
-                return memRead16(memRead(pc) + irx);
+                return memRead16(memRead(addr) + irx);
             case IndirectY:
-                return memRead16(memRead(pc)) + iry;
+                return memRead16(memRead(addr)) + iry;
             default:
                 throw new IllegalArgumentException("Invalid addressing mode (" + mode + ")");
         }
