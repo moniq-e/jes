@@ -7,7 +7,8 @@ import com.monique.jes.Bus;
 import com.monique.jes.utils.Memory;
 
 //21441960 Hz
-public class CPU implements Memory{
+public class CPU implements Memory {
+    private final int DELTA_TIME = 70000;
     private Bus bus;
     private int pc; // 16 bit
     private short sp; // 8 bit
@@ -68,8 +69,16 @@ public class CPU implements Memory{
 
     public void runWithCallback(Consumer<CPU> callback) {
         var opcodes = Opcode.getOpcodesMap();
+        var delta = DELTA_TIME;
 
         while (true) {
+            if (delta == 0) {
+                delta = DELTA_TIME;
+            } else {
+                delta--;
+                continue;
+            }
+
             callback.accept(this);
 
             var code = memRead(pc);
