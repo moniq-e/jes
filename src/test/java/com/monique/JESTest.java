@@ -2,12 +2,98 @@ package com.monique;
 
 import static org.junit.Assert.*;
 
+import java.io.FileWriter;
+import java.util.ArrayList;
+
 import org.junit.Test;
 
 import com.monique.jes.Bus;
 import com.monique.jes.cpu.CPU;
+import com.monique.jes.utils.Rom;
 
-public class JESTest {
+public class JESTest implements Trace {
+    public final Rom TEST_ROM;
+
+    public JESTest() throws Exception {
+        TEST_ROM = new Rom(getClass().getResourceAsStream("/nestest.nes"));
+    }
+
+    @Test
+    public void testRom() throws Exception {
+        var log = new FileWriter("./log.txt");
+
+        var cpu = new CPU(new Bus(TEST_ROM));
+        cpu.reset();
+        cpu.setPC(0xC000);
+        cpu.runWithCallback(c -> {
+            try {
+                log.write(trace(c) + "\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        });
+
+        log.close();
+    }
+
+    @Test
+    public void testFormatTrace() {
+        var bus = new Bus(TEST_ROM);
+        bus.memWrite(100, 0xa2);
+        bus.memWrite(101, 0x01);
+        bus.memWrite(102, 0xca);
+        bus.memWrite(103, 0x88);
+        bus.memWrite(104, 0x00);
+
+        var cpu = new CPU(bus);
+        cpu.setPC(0x64);
+        cpu.setAcc(1);
+        cpu.setIrx(2);
+        cpu.setIry(3);
+        var result = new ArrayList<String>();
+        cpu.runWithCallback(c -> {
+            try {
+                result.add(trace(c));
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        });
+        assertEquals("0064  A2 01     LDX #$01                        A:01 X:02 Y:03 P:24 SP:FD", result.get(0));
+        assertEquals("0066  CA        DEX                             A:01 X:01 Y:03 P:24 SP:FD", result.get(1));
+        assertEquals("0067  88        DEY                             A:01 X:00 Y:03 P:26 SP:FD", result.get(2));
+    }
+
+    @Test
+    public void testFormatMemAccess() {
+        var bus = new Bus(TEST_ROM);
+        // ORA ($33), Y
+        bus.memWrite(100, 0x11);
+        bus.memWrite(101, 0x33);
+ 
+ 
+        //data
+        bus.memWrite(0x33, 00);
+        bus.memWrite(0x34, 04);
+ 
+        //target cell
+        bus.memWrite(0x400, 0xAA);
+ 
+        var cpu = new CPU(bus);
+        cpu.setPC(0x64);
+        cpu.setIry(0);
+        var result = new ArrayList<String>();
+        cpu.runWithCallback(c -> {
+            try {
+                result.add(trace(c));
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(-1);
+            }
+        });
+        assertEquals("0064  11 33     ORA ($33),Y = 0400 @ 0400 = AA  A:00 X:00 Y:00 P:24 SP:FD", result.get(0));
+    }
 
     @Test
     public void testImmediateLDA() {

@@ -14,13 +14,8 @@ public class SnakeGame {
         var screen = new SnakeScreen(cpu);
 
         cpu.runWithCallback(c -> {
-            try {
-                cpu.memWrite(0xFE, (int) Math.floor(Math.random() * 16) + 1);
-                screen.update();
-                Thread.sleep(1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            cpu.memWrite(0xFE, (int) Math.floor(Math.random() * 16) + 1);
+            screen.update();
         });
     }
 }

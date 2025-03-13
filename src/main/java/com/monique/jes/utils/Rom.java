@@ -10,10 +10,10 @@ public class Rom {
     public final int PRG_ROM_PAGE_SIZE = 16384;
     public final int CHR_ROM_PAGE_SIZE = 8192;
 
-    public short[] prgRom;
-    public short[] chrRom;
-    public short mapper;
-    public Mirroring mirroring;
+    public final short[] prgRom;
+    public final short[] chrRom;
+    public final short mapper;
+    public final Mirroring mirroring;
 
     public Rom(InputStream unparsedRaw) throws Exception {
         var raw = rawParser(unparsedRaw);

@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import com.monique.jes.Bus;
 import com.monique.jes.utils.Memory;
+import com.monique.jes.utils.Unsign;
 
 //21441960 Hz
 public class CPU implements Memory {
@@ -92,6 +93,7 @@ public class CPU implements Memory {
                 //BRK
                 case 0x00 -> {
                     setStatusFlag(Flag.B, true);
+                    System.out.println("Break");
                     return;
                 }
                 //ADC
@@ -524,6 +526,13 @@ public class CPU implements Memory {
         switch (mode) {
             case Immediate:
                 return pc;
+            default:
+                return getAbsoluteAddr(mode, pc);
+        }
+    }
+
+    public int getAbsoluteAddr(AddressingMode mode, int addr) {
+        switch (mode) {
             case ZeroPage:
                 return memRead(pc);
             case ZeroPageX:
@@ -540,7 +549,6 @@ public class CPU implements Memory {
                 return memRead16(memRead(pc) + irx);
             case IndirectY:
                 return memRead16(memRead(pc)) + iry;
-            case NoneAddressing:
             default:
                 throw new IllegalArgumentException("Invalid addressing mode (" + mode + ")");
         }
@@ -614,10 +622,6 @@ public class CPU implements Memory {
         setStatusFlag(Flag.N, (value & 0x80) != 0);
     }
 
-    public short unsignByte(int value) {
-        return (short) (value & 0xFF);
-    }
-
     public void incPC() {
         pc = (pc + 1) & 0xFFFF;
     }
@@ -635,19 +639,19 @@ public class CPU implements Memory {
     }
 
     public void setAcc(int value) {
-        acc = unsignByte(value);
+        acc = Unsign.unsignByte(value);
     }
 
     public void setIrx(int value) {
-        irx = unsignByte(value);
+        irx = Unsign.unsignByte(value);
     }
 
     public void setIry(int value) {
-        iry = unsignByte(value);
+        iry = Unsign.unsignByte(value);
     }
 
     public void setSp(int value) {
-        sp = unsignByte(value);
+        sp = Unsign.unsignByte(value);
     }
 
     // Test only
@@ -661,5 +665,21 @@ public class CPU implements Memory {
 
     public short getIrx() {
         return irx;
+    }
+
+    public short getIry() {
+        return iry;
+    }
+
+    public int getPC() {
+        return pc;
+    }
+
+    public void setPC(int value) {
+        pc = Unsign.unsignShort(value);
+    }
+
+    public short getSP() {
+        return sp;
     }
 }

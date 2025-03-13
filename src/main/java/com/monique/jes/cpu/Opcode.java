@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 public class Opcode {
     private static final ArrayList<Opcode> opcodes = new ArrayList<>();
+    private static final HashMap<Short, Opcode> opcodesMap = new HashMap<>();
 
     static {
         opcodes.add(new Opcode(0x00, "BRK", 1, 7));
@@ -217,11 +218,12 @@ public class Opcode {
     }
 
     public static HashMap<Short, Opcode> getOpcodesMap() {
-        HashMap<Short, Opcode> map = new HashMap<>();
-        for (Opcode opcode : opcodes) {
-            map.put((short) opcode.code, opcode);
+        if (opcodesMap.size() == 0) {
+            for (Opcode opcode : opcodes) {
+                opcodesMap.put((short) opcode.code, opcode);
+            }
         }
-        return map;
+        return opcodesMap;
     }
 
     public int getCode() {
