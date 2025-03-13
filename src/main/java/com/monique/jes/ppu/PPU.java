@@ -20,4 +20,49 @@ public class PPU {
     public void writeToPPUAddr(short /* u8 */ value) {
         addr.update(value);
     }
+
+    public short readData() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'readData'");
+    }
+
+    public void writeToCtrl(int value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeToCtrl'");
+    }
+
+    public void writeToData(int value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeToData'");
+    }
+
+    public short readStatus() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'readStatus'");
+    }
+
+    public short readOamData() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'readOamData'");
+    }
+
+    public void writeToMask(int value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeToMask'");
+    }
+
+    public void writeToOamAddr(int value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeToOamAddr'");
+    }
+
+    public void writeToOamData(int value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeToOamData'");
+    }
+
+    public void writeToScroll(int value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'writeToScroll'");
+    }
 }

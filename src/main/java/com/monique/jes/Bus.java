@@ -1,20 +1,23 @@
 package com.monique.jes;
 
+import com.monique.jes.ppu.PPU;
 import com.monique.jes.utils.Memory;
 import com.monique.jes.utils.Rom;
 
 public class Bus implements Memory {
     private final int RAM = 0x0000; // 16 bit
     private final int RAM_MIRRORS_END = 0x1FFF; // 16 bit
-    private final int PPU_REGISTERS = 0x2000; // 16 bit
+    //private final int PPU_REGISTERS = 0x2000; // 16 bit
     private final int PPU_REGISTERS_MIRRORS_END = 0x3FFF; // 16 bit
 
     private short[] cpuVram; // 2048 bytes
     private Rom rom;
+    private PPU ppu;
 
     public Bus(Rom rom) {
-        cpuVram = new short[2048];
         this.rom = rom;
+        cpuVram = new short[2048];
+        ppu = new PPU(rom.chrRom, rom.mirroring);
     }
 
     public short readPrgRom(int addr) {
@@ -34,13 +37,23 @@ public class Bus implements Memory {
             int mirrorDownAddr = addr & 0x07FF;
             return cpuVram[mirrorDownAddr];
 
-        } else if (addr >= PPU_REGISTERS && addr <= PPU_REGISTERS_MIRRORS_END) {
+        } else if (addr == 0x2000 || addr == 0x2001 || addr == 0x2003 || addr == 0x2005 || addr == 0x2006 || addr == 0x4014) {
+            System.err.printf("Attempt to read from write-only PPU address: %0x\n", addr);
+        } else if (addr == 0x2002) {
+            return ppu.readStatus();
+        } else if (addr == 0x2004) {
+            return ppu.readOamData();
+        } else if (addr == 0x2007) {
+            return ppu.readData();
+        } else if (addr >= 0x2008 && addr <= PPU_REGISTERS_MIRRORS_END) {
+
             int mirrorDownAddr = addr & 0x2007;
-            //return cpuVram[mirrorDownAddr];
+            return memRead(mirrorDownAddr);
+
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             return readPrgRom(addr);
         } else {
-            System.out.printf("Ignoring mem access at %d\n", addr);
+            System.out.printf("Ignoring mem access at %d\n.", addr);
         }
         return 0;
     }
@@ -52,13 +65,31 @@ public class Bus implements Memory {
             int mirrorDownAddr = addr & 0x07FF;
             cpuVram[mirrorDownAddr] = (short) (value & 0xFF);
 
-        } else if (addr >= PPU_REGISTERS && addr <= PPU_REGISTERS_MIRRORS_END) {
+        } else if (addr == 0x2000) {
+            ppu.writeToCtrl(value);
+        } else if (addr == 0x2001) {
+            ppu.writeToMask(value);
+        } else if (addr == 0x2002) {
+            System.err.println("Attempt to write to PPU status register.");
+        } else if (addr == 0x2003) {
+            ppu.writeToOamAddr(value);
+        } else if (addr == 0x2004) {
+            ppu.writeToOamData(value);
+        } else if (addr == 0x2005) {
+            ppu.writeToScroll(value);
+        } else if (addr == 0x2006) {
+            ppu.writeToPPUAddr((short) (value & 0xFF));
+        } else if (addr == 0x2007) {
+            ppu.writeToData(value);
+        } else if (addr >= 0x2008 && addr <= PPU_REGISTERS_MIRRORS_END) {
+
             int mirrorDownAddr = addr & 0x2007;
-            //return cpuVram[mirrorDownAddr];
+            memWrite(mirrorDownAddr, value);
+
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
-            System.err.println("Attempt to write to Cartridge ROM space");
+            System.err.println("Attempt to write to Cartridge ROM space.");
         } else {
-            System.out.printf("Ignoring mem write-access at %d\n", addr);
+            System.out.printf("Ignoring mem write-access at %d\n.", addr);
         }
     }
 }
