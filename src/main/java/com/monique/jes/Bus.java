@@ -5,6 +5,8 @@ import com.monique.jes.ppu.PPU;
 import com.monique.jes.utils.Memory;
 import com.monique.jes.utils.Rom;
 
+import static com.monique.jes.utils.Unsign.*;
+
 public class Bus implements Memory {
     private final int RAM = 0x0000; // 16 bit
     private final int RAM_MIRRORS_END = 0x1FFF; // 16 bit
@@ -73,7 +75,7 @@ public class Bus implements Memory {
             cpuVram[mirrorDownAddr] = (short) (value & 0xFF);
 
         } else if (addr == 0x2000) {
-            ppu.writeToCtrl(value);
+            ppu.writeToCtrl(unsignByte(value));
         } else if (addr == 0x2001) {
             ppu.writeToMask(value);
         } else if (addr == 0x2002) {

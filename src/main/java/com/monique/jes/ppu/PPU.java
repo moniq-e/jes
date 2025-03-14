@@ -15,20 +15,37 @@ public class PPU {
         vram = new short[2048];
         oamData = new short[256];
         palleteTable = new short[32];
+        addr = new AddrRegister();
+        ctrl = new ControlRegister();
     }
 
     public void writeToPPUAddr(short /* u8 */ value) {
         addr.update(value);
     }
 
-    public short readData() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'readData'");
+    public void incrementVramAddr() {
+        addr.increment(ctrl.vramAddrIncrement());
     }
 
-    public void writeToCtrl(int value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeToCtrl'");
+    public short /* u8 */ readData() {
+        var addrTmp = addr.get();
+        incrementVramAddr();
+
+        if (addrTmp <= 0x1FFF) {
+            
+        } else if (addrTmp <= 0x2FFF) {
+
+        } else if (addrTmp <= 0x3EFF) {
+
+        } else if (addrTmp <= 0x3FFF) {
+            return palleteTable[addrTmp - 0x3F00];
+        } else {
+             
+        }
+    }
+
+    public void writeToCtrl(short /* u8 */ value) {
+        ctrl.update(value);
     }
 
     public void writeToData(int value) {
