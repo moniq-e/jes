@@ -1,4 +1,4 @@
-package com.monique.jes.ppu;
+package com.monique.jes.ppu.registers;
 
 import static com.monique.jes.utils.Unsign.unsignByte;
 
@@ -12,7 +12,7 @@ public class ControlRegister {
     }
     
     public short /* u8 */ vramAddrIncrement() {
-        return !getBitsFlag(PPUFlag.VRAM_ADD_INCREMENT) ? (short) 1 : (short) 32;
+        return !getBitsFlag(ControlFlag.VRAM_ADD_INCREMENT) ? (short) 1 : (short) 32;
     }
 
     public void update(short /* u8 */ data) {
@@ -37,11 +37,11 @@ public class ControlRegister {
      * +--------- Generate an NMI at the start of the
      *            vertical blanking interval (0: off; 1: on)
      */
-    public void setBitsFlag(PPUFlag flag, boolean value) {
+    public void setBitsFlag(ControlFlag flag, boolean value) {
         bits.setBitFlag(flag, value);
     }
 
-    public boolean getBitsFlag(PPUFlag flag) {
+    public boolean getBitsFlag(ControlFlag flag) {
         return bits.getBitFlag(flag);
     }
 }

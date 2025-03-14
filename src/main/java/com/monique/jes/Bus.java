@@ -77,7 +77,7 @@ public class Bus implements Memory {
         } else if (addr == 0x2000) {
             ppu.writeToCtrl(unsignByte(value));
         } else if (addr == 0x2001) {
-            ppu.writeToMask(value);
+            ppu.writeToMask(unsignByte(value));
         } else if (addr == 0x2002) {
             System.err.println("Attempt to write to PPU status register.");
         } else if (addr == 0x2003) {

@@ -1,4 +1,4 @@
-package com.monique.jes.ppu;
+package com.monique.jes.ppu.registers;
 
 import com.monique.jes.utils.Pair;
 import static com.monique.jes.utils.Unsign.unsignShort;

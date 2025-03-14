@@ -1,9 +1,9 @@
-package com.monique.jes.ppu;
+package com.monique.jes.ppu.registers;
 
 import com.monique.jes.utils.bitflag.Flag;
 import com.monique.jes.utils.bitflag.InnerFlag;
 
-public enum PPUFlag implements Flag {
+public enum ControlFlag implements Flag {
     GENERATE_NMI(InnerFlag.F1),
     MASTER_SLAVE_SELECT(InnerFlag.F2),
     SPRITE_SIZE(InnerFlag.F3),
@@ -15,7 +15,7 @@ public enum PPUFlag implements Flag {
 
     private final InnerFlag FLAG;
 
-    private PPUFlag(InnerFlag flag) {
+    private ControlFlag(InnerFlag flag) {
         FLAG = flag;
     }
 
