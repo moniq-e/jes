@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import com.monique.jes.Bus;
 import com.monique.jes.utils.Memory;
+import com.monique.jes.utils.Pair;
 import com.monique.jes.utils.bitflag.BitFlag;
 import com.monique.jes.utils.interrupt.Interrupt;
 
@@ -146,15 +147,15 @@ public class CPU implements Memory {
                 case 0xB8 -> setStatusFlag(CPUFlag.OVERFLOW, false);
                 //CMP
                 case 0xC9, 0xC5, 0xD5, 0xCD, 0xDD, 0xD9, 0xC1, 0xD1 -> {
-                    cmp(opcode.getMode());
+                    compare(opcode.getMode(), acc);
                 }
                 //CPX
                 case 0xE0, 0xE4, 0xEC -> {
-                    cpx(opcode.getMode());
+                    compare(opcode.getMode(), irx);
                 }
                 //CPY
                 case 0xC0, 0xC4, 0xCC -> {
-                    cpy(opcode.getMode());
+                    compare(opcode.getMode(), iry);
                 }
                 //DEC
                 case 0xC6, 0xD6, 0xCE, 0xDE -> {
@@ -239,8 +240,13 @@ public class CPU implements Memory {
                 case 0xEA -> { }
                 //ORA
                 case 0x09, 0x05, 0x15, 0x0D, 0x1D, 0x19, 0x01, 0x11 -> {
-                    setAcc(acc | memRead(getOperandAddr(opcode.getMode())));
+                    var pair = getOperandAddr(opcode.getMode());
+                    setAcc(acc | memRead(pair.getFirst()));
                     updateZNFlags(acc);
+
+                    if (pair.getSecond()) {
+                        bus.tick((short) 1);
+                    }
                 }
                 //PHA
                 case 0x48 -> stackPush(acc);
@@ -309,12 +315,12 @@ public class CPU implements Memory {
                 }
                 //STX
                 case 0x86, 0x96, 0x8E -> {
-                    var addr = getOperandAddr(opcode.getMode());
+                    var addr = getOperandAddr(opcode.getMode()).getFirst();
                     memWrite(addr, irx);
                 }
                 //STY
                 case 0x84, 0x94, 0x8C -> {
-                    var addr = getOperandAddr(opcode.getMode());
+                    var addr = getOperandAddr(opcode.getMode()).getFirst();
                     memWrite(addr, iry);
                 }
                 //TAX
@@ -371,16 +377,24 @@ public class CPU implements Memory {
     }
 
     public void adc(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        var value = memRead(addr);
+        var pair = getOperandAddr(mode);
+        var value = memRead(pair.getFirst());
         addToAcc(value);
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void and(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        var value = memRead(addr);
+        var pair = getOperandAddr(mode);
+        var value = memRead(pair.getFirst());
         setAcc(acc & value);
         updateZNFlags(acc);
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void aslAccumulator() {
@@ -390,7 +404,7 @@ public class CPU implements Memory {
     }
 
     public void asl(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         setStatusFlag(CPUFlag.CARRY, (value & 0x80) != 0);
         value <<= 1;
@@ -406,75 +420,81 @@ public class CPU implements Memory {
     }
 
     public void bit(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         setStatusFlag(CPUFlag.ZERO, (acc & value) == 0);
         setStatusFlag(CPUFlag.NEGATIVE, (value & 0x80) != 0);
         setStatusFlag(CPUFlag.OVERFLOW, (value & 0x40) != 0);
     }
 
-    public void cmp(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        var value = memRead(addr);
-        setStatusFlag(CPUFlag.CARRY, acc >= value);
-        updateZNFlags((short) (acc - value));
-    }
+    public void compare(AddressingMode mode, short with) {
+        var pair = getOperandAddr(mode);
+        var value = memRead(pair.getFirst());
+        setStatusFlag(CPUFlag.CARRY, value <= with);
+        updateZNFlags((short) (with - value));
 
-    public void cpx(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        var value = memRead(addr);
-        setStatusFlag(CPUFlag.CARRY, irx >= value);
-        updateZNFlags((short) (irx - value));
-    }
-
-    public void cpy(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        var value = memRead(addr);
-        setStatusFlag(CPUFlag.CARRY, iry >= value);
-        updateZNFlags((short) (iry - value));
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void dec(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         memWrite(addr, --value);
         updateZNFlags(value);
     }
 
     public void eor(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        var value = memRead(addr);
+        var pair = getOperandAddr(mode);
+        var value = memRead(pair.getFirst());
         setAcc(acc ^ value);
         updateZNFlags(acc);
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void inc(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         memWrite(addr, ++value);
         updateZNFlags(value);
     }
 
     public void lda(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        setAcc(memRead(addr));
+        var pair = getOperandAddr(mode);
+        setAcc(memRead(pair.getFirst()));
         updateZNFlags(acc);
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void ldx(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        setIrx(memRead(addr));
+        var pair = getOperandAddr(mode);
+        setIrx(memRead(pair.getFirst()));
         updateZNFlags(irx);
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void ldy(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        setIry(memRead(addr));
+        var pair = getOperandAddr(mode);
+        setIry(memRead(pair.getFirst()));
         updateZNFlags(iry);
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void lsr(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         setStatusFlag(CPUFlag.CARRY, (value & 0x1) != 0);
         value >>= 1;
@@ -483,7 +503,7 @@ public class CPU implements Memory {
     }
 
     public void rol(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         var carry = pstatus.getBitFlag(CPUFlag.CARRY);
         setStatusFlag(CPUFlag.CARRY, (value & 0x80) != 0);
@@ -493,7 +513,7 @@ public class CPU implements Memory {
     }
 
     public void ror(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         var value = memRead(addr);
         var carry = pstatus.getBitFlag(CPUFlag.CARRY);
         setStatusFlag(CPUFlag.CARRY, (value & 0x1) != 0);
@@ -503,13 +523,17 @@ public class CPU implements Memory {
     }
 
     public void sbc(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
-        byte value = (byte) memRead(addr);
+        var pair = getOperandAddr(mode);
+        byte value = (byte) memRead(pair.getFirst());
         addToAcc((short) (((~value) - 1) & 0xFF));
+
+        if (pair.getSecond()) {
+            bus.tick((short) 1);
+        }
     }
 
     public void sta(AddressingMode mode) {
-        var addr = getOperandAddr(mode);
+        var addr = getOperandAddr(mode).getFirst();
         memWrite(addr, acc);
     }
 
@@ -544,36 +568,46 @@ public class CPU implements Memory {
         bus.memWrite(addr, value);
     }
 
-    public int getOperandAddr(AddressingMode mode) {
+    public Pair<Integer, Boolean> getOperandAddr(AddressingMode mode) {
         switch (mode) {
             case Immediate:
-                return pc;
+                return Pair.of(pc, false);
             default:
                 return getAbsoluteAddr(mode, pc);
         }
     }
 
-    public int getAbsoluteAddr(AddressingMode mode, int addr) {
+    public Pair<Integer, Boolean> getAbsoluteAddr(AddressingMode mode, int addr) {
         switch (mode) {
             case ZeroPage:
-                return memRead(addr);
+                return Pair.of((int) memRead(addr), false);
             case ZeroPageX:
-                return (memRead(addr) + irx) & 0xFFFF;
+                return Pair.of((memRead(addr) + irx) & 0xFFFF, false);
             case ZeroPageY:
-                return (memRead(addr) + iry) & 0xFFFF;
+                return Pair.of((memRead(addr) + iry) & 0xFFFF, false);
             case Absolute:
-                return memRead16(addr);
+                return Pair.of(memRead16(addr), false);
             case AbsoluteX:
-                return (memRead16(addr) + irx) & 0xFFFF;
+                var base = memRead16(addr);
+                var res = (base + irx) & 0xFFFF;
+                return Pair.of(res, pageCross(base, res));
             case AbsoluteY:
-                return (memRead16(addr) + iry) & 0xFFFF;
+                base = memRead16(addr);
+                res = (base + iry) & 0xFFFF;
+                return Pair.of(res, pageCross(base, res));
             case IndirectX:
-                return memRead16(memRead(addr) + irx);
+                return Pair.of(memRead16(memRead(addr) + irx), false);
             case IndirectY:
-                return memRead16(memRead(addr)) + iry;
+                base = memRead16(memRead(addr));
+                res = (base + iry) & 0xFFFF;
+                return Pair.of(res, pageCross(res, base));
             default:
                 throw new IllegalArgumentException("Invalid addressing mode (" + mode + ")");
         }
+    }
+
+    public boolean pageCross(int addr1, int addr2) {
+        return (addr1 & 0xFF00) != (addr2 & 0xFF00);
     }
 
     public void setStatusFlag(CPUFlag flag, boolean value) {
