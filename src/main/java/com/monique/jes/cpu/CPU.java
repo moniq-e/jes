@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import com.monique.jes.Bus;
 import com.monique.jes.utils.Memory;
 import com.monique.jes.utils.bitflag.BitFlag;
+import com.monique.jes.utils.interrupt.Interrupt;
 
 //21441960 Hz
 public class CPU implements Memory {
@@ -75,13 +76,15 @@ public class CPU implements Memory {
         var delta = DELTA_TIME;
 
         while (true) {
-
-
             if (delta == 0) {
                 delta = DELTA_TIME;
             } else {
                 delta--;
                 continue;
+            }
+
+            if (bus.pollNMIStatus().isPresent()) {
+                interrupt(Interrupt.NMI);
             }
 
             callback.accept(this);
@@ -109,7 +112,7 @@ public class CPU implements Memory {
                     and(opcode.getMode());
                 }
                 //ASL
-                case 0x0A -> asl_accumulator();
+                case 0x0A -> aslAccumulator();
                 case 0x06, 0x16, 0x0E, 0x1E -> {
                     asl(opcode.getMode());
                 }
@@ -353,6 +356,20 @@ public class CPU implements Memory {
         }
     }
 
+    public void interrupt(Interrupt interrupt) {
+        stackPush16(pc);
+
+        var flag = pstatus.clone();
+        flag.setBitFlag(CPUFlag.BREAK, (interrupt.getBFlagMask() & 0x10) == 1);
+        flag.setBitFlag(CPUFlag.BREAK2, (interrupt.getBFlagMask() & 0x20) == 1);
+
+        stackPush(flag.getBits());
+        setStatusFlag(CPUFlag.INTERRUPT, true);
+
+        bus.tick(interrupt.getCpuCicles());
+        setPC(memRead16(interrupt.getVectorAddr()));
+    }
+
     public void adc(AddressingMode mode) {
         var addr = getOperandAddr(mode);
         var value = memRead(addr);
@@ -366,7 +383,7 @@ public class CPU implements Memory {
         updateZNFlags(acc);
     }
 
-    public void asl_accumulator() {
+    public void aslAccumulator() {
         setStatusFlag(CPUFlag.CARRY, (acc & 0x80) != 0);
         setAcc(acc << 1);
         updateZNFlags(acc);

@@ -2,6 +2,8 @@ package com.monique.jes.ppu;
 
 import static com.monique.jes.utils.Unsign.*;
 
+import java.util.Optional;
+
 import com.monique.jes.ppu.registers.AddrRegister;
 import com.monique.jes.ppu.registers.ControlFlag;
 import com.monique.jes.ppu.registers.ControlRegister;
@@ -27,6 +29,7 @@ public class PPU {
 
     private int/* u16 */ scanline;
     private int/* usize */ cycles;
+    private Optional<Short> nmiInterrupt;
 
     public PPU(short[] chrRom, Mirroring mirroring) {
         this.chrRom = chrRom;
@@ -187,5 +190,9 @@ public class PPU {
             oamData[oamAddr] = x;
             oamAddr = unsignByte((oamAddr + 1) % oamData.length);
         }
+    }
+
+    public Optional<Short> pollNmiInterrupt() {
+        return nmiInterrupt;
     }
 }

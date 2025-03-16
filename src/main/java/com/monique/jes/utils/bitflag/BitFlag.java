@@ -14,6 +14,12 @@ public class BitFlag {
         reset();
     }
 
+    public BitFlag clone() {
+        BitFlag clone = new BitFlag(DEFAULT_BITS);
+        clone.setBits(bits);
+        return clone;
+    }
+
     public short getBits() {
         return bits;
     }

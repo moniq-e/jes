@@ -7,6 +7,8 @@ import com.monique.jes.utils.Rom;
 
 import static com.monique.jes.utils.Unsign.*;
 
+import java.util.Optional;
+
 public class Bus implements Memory {
     private final int RAM = 0x0000; // 16 bit
     private final int RAM_MIRRORS_END = 0x1FFF; // 16 bit
@@ -124,5 +126,9 @@ public class Bus implements Memory {
 
     public Joypad getJoypad() {
         return joypad;
+    }
+
+    public Optional<Short> pollNMIStatus() {
+        return ppu.pollNmiInterrupt();
     }
 }
