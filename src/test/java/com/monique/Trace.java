@@ -19,7 +19,7 @@ public interface Trace {
         Pair pair = switch (opcode.getMode()) {
             case Immediate, NoneAddressing -> new Pair(0, 0);
             default -> {
-                var addr = cpu.getAbsoluteAddr(opcode.getMode(), begin + 1);
+                var addr = cpu.getAbsoluteAddr(opcode.getMode(), begin + 1).getFirst();
                 yield new Pair(addr, cpu.memRead(addr));
             }
         };
