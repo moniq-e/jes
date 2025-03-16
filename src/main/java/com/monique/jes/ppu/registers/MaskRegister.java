@@ -31,16 +31,16 @@ public class MaskRegister {
         return bits.getBitFlag(MaskFlag.SHOW_SPRITES);
     }
 
-    public ArrayList<Color> emphasize() {
-        ArrayList<Color> result = new ArrayList<>();
+    public ArrayList<ColorEnum> emphasize() {
+        ArrayList<ColorEnum> result = new ArrayList<>();
         if (bits.getBitFlag(MaskFlag.EMPHASISE_RED)) {
-            result.add(Color.RED);
+            result.add(ColorEnum.RED);
         }
         if (bits.getBitFlag(MaskFlag.EMPHASISE_GREEN)) {
-            result.add(Color.GREEN);
+            result.add(ColorEnum.GREEN);
         }
         if (bits.getBitFlag(MaskFlag.EMPHASISE_BLUE)) {
-            result.add(Color.BLUE);
+            result.add(ColorEnum.BLUE);
         }
 
         return result;

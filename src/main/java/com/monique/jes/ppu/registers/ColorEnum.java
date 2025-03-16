@@ -1,6 +1,6 @@
 package com.monique.jes.ppu.registers;
 
-public enum Color {
+public enum ColorEnum {
     RED,
     GREEN,
     BLUE
