@@ -23,12 +23,12 @@ public class TilePanel extends JPanel {
     public TilePanel() {
         Rom rom = null;
         try {
-            rom = new Rom(getClass().getResourceAsStream("/pacman.nes"));
+            rom = new Rom(getClass().getResourceAsStream("/mariobros.nes"));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        var rightBank = showTileBank(rom.chrRom, 1);
+        var rightBank = showTileBank(rom.chrRom, 0);
         texture = rightBank.getData();
 
         this.setPreferredSize(new Dimension(SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE));
