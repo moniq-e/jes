@@ -8,6 +8,7 @@ import com.monique.jes.utils.Rom;
 import static com.monique.jes.utils.Unsign.*;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class Bus implements Memory {
     private final int RAM = 0x0000; // 16 bit
@@ -19,20 +20,29 @@ public class Bus implements Memory {
     private Rom rom;
     private PPU ppu;
     private Joypad joypad;
+    private Consumer<Bus> callback;
 
     private int cycles;
 
-    public Bus(Rom rom) {
+    public Bus(Rom rom, Consumer<Bus> callback) {
         this.rom = rom;
         cpuVram = new short[2048];
         ppu = new PPU(rom.chrRom, rom.mirroring);
         joypad = new Joypad();
+        this.callback = callback;
         cycles = 0;
     }
 
     public void tick(short/* u8 */ cycles) {
         this.cycles += cycles;
+
+        var nmiBefore = ppu.pollNmiInterrupt().isPresent();
         ppu.tick(unsignByte(cycles * 3));
+        var nmiAfter = ppu.pollNmiInterrupt().isPresent();
+
+        if (!nmiBefore && nmiAfter) {
+            callback.accept(this);
+        }
     }
 
     public short readPrgRom(int addr) {

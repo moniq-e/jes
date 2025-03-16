@@ -8,17 +8,13 @@ public class JES {
         try {
             var rom = getClass().getResourceAsStream("/snake.nes");
 
-            var cpu = new CPU(new Bus(new Rom(rom)));
-            cpu.reset();
-    
-            cpu.runWithCallback(c -> {
-                try {
-    
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            var bus = new Bus(new Rom(rom), b -> {
+                
             });
+
+            var cpu = new CPU(bus);
+            cpu.reset();
+            cpu.run();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
