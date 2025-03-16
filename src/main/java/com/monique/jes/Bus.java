@@ -24,6 +24,10 @@ public class Bus implements Memory {
 
     private int cycles;
 
+    public Bus(Rom rom) {
+        this(rom, b -> {});
+    }
+
     public Bus(Rom rom, Consumer<Bus> callback) {
         this.rom = rom;
         cpuVram = new short[2048];
