@@ -18,11 +18,19 @@ public class Bus implements Memory {
     private PPU ppu;
     private Joypad joypad;
 
+    private int cycles;
+
     public Bus(Rom rom) {
         this.rom = rom;
         cpuVram = new short[2048];
         ppu = new PPU(rom.chrRom, rom.mirroring);
         joypad = new Joypad();
+        cycles = 0;
+    }
+
+    public void tick(short/* u8 */ cycles) {
+        this.cycles += cycles;
+        ppu.tick(unsignByte(cycles * 3));
     }
 
     public short readPrgRom(int addr) {
@@ -70,10 +78,8 @@ public class Bus implements Memory {
     @Override
     public void memWrite(int addr, int value) {
         if (addr >= RAM && addr <= RAM_MIRRORS_END) {
-
             int mirrorDownAddr = addr & 0x07FF;
             cpuVram[mirrorDownAddr] = (short) (value & 0xFF);
-
         } else if (addr == 0x2000) {
             ppu.writeToCtrl(unsignByte(value));
         } else if (addr == 0x2001) {
@@ -89,7 +95,7 @@ public class Bus implements Memory {
         } else if (addr == 0x2006) {
             ppu.writeToPPUAddr((short) (value & 0xFF));
         } else if (addr == 0x2007) {
-            ppu.writeToData(value);
+            ppu.writeToData(unsignByte(value));
         } else if (addr >= 0x2008 && addr <= PPU_REGISTERS_MIRRORS_END) {
 
             int mirrorDownAddr = addr & 0x2007;

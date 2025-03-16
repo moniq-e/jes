@@ -1,5 +1,7 @@
 package com.monique.jes.cpu;
 
+import static com.monique.jes.utils.Unsign.unsignByte;
+
 import java.io.InputStream;
 import java.util.function.Consumer;
 
@@ -74,6 +76,8 @@ public class CPU implements Memory {
         var delta = DELTA_TIME;
 
         while (true) {
+
+
             if (delta == 0) {
                 delta = DELTA_TIME;
             } else {
@@ -342,6 +346,7 @@ public class CPU implements Memory {
                     throw new IllegalArgumentException(String.format("Invalid opcode (%02x).", code));
                 }
             }
+            bus.tick(unsignByte(opcode.getCycles()));
 
             if (pcState == pc) {
                 incPC(opcode.getLength() - 1);

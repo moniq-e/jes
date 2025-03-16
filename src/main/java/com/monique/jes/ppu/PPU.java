@@ -3,6 +3,7 @@ package com.monique.jes.ppu;
 import static com.monique.jes.utils.Unsign.*;
 
 import com.monique.jes.ppu.registers.AddrRegister;
+import com.monique.jes.ppu.registers.ControlFlag;
 import com.monique.jes.ppu.registers.ControlRegister;
 import com.monique.jes.ppu.registers.MaskRegister;
 import com.monique.jes.ppu.registers.ScrollRegister;
@@ -24,6 +25,9 @@ public class PPU {
     private short/* u8 */[] oamData; // internal memory to keep state of sprites
     private Mirroring mirroring; // gave by the game
 
+    private int/* u16 */ scanline;
+    private int/* usize */ cycles;
+
     public PPU(short[] chrRom, Mirroring mirroring) {
         this.chrRom = chrRom;
         this.mirroring = mirroring;
@@ -38,42 +42,26 @@ public class PPU {
         status = new StatusRegister();
     }
 
-    public void writeToPPUAddr(short /* u8 */ value) {
-        addr.update(value);
-    }
+    public boolean tick(short/* u8 */ cycles) {
+        this.cycles += cycles;
+        if (this.cycles >= 341) {
+            this.cycles = this.cycles - 341;
+            this.scanline += 1;
 
-    public void incrementVramAddr() {
-        addr.increment(ctrl.vramAddrIncrement());
-    }
-
-    public short /* u8 */ readData() {
-        var addrTmp = addr.get();
-        incrementVramAddr();
-        try {
-            if (addrTmp <= 0x1FFF) {
-                short result = internalDataBuf;
-                internalDataBuf = unsignByte(chrRom[addrTmp]);
-                return unsignByte(result);
-            } else if (addrTmp <= 0x2FFF) {
-                short result = internalDataBuf;
-                internalDataBuf = unsignByte(vram[mirrorVramAddr(addrTmp)]);
-                return unsignByte(result);
-            } else if (addrTmp <= 0x3EFF) {
-                // TODO: Unimplemented addr
-                return -1;
-            } else if (addrTmp <= 0x3FFF) {
-                return unsignByte(palleteTable[addrTmp - 0x3F00]);
-            } else {
-                throw new UnexpectedAccessException(addrTmp);
+            if (this.scanline == 241) {
+                if (this.ctrl.getBitsFlag(ControlFlag.GENERATE_NMI)) {
+                    status.setVBlankStatus(true);
+                    throw new UnsupportedOperationException("TODO: Should trigger NMI interrupt");
+                }
             }
-        } catch (UnexpectedAccessException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
 
-    public void writeToCtrl(short /* u8 */ value) {
-        ctrl.update(value);
+            if (this.scanline >= 262) {
+                scanline = 0;
+                status.resetVBlankStatus();
+                return true;
+            }
+        }
+        return false;
     }
 
     // Horizontal:
@@ -102,9 +90,16 @@ public class PPU {
         }
     }
 
-    public void writeToData(int value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeToData'");
+    public void incrementVramAddr() {
+        addr.increment(ctrl.vramAddrIncrement());
+    }
+
+    public void writeToCtrl(short /* u8 */ value) {
+        ctrl.update(value);
+    }
+
+    public void writeToMask(short/* u8 */ value) {
+        mask.update(unsignByte(value));
     }
 
     public short/* u8 */ readStatus() {
@@ -115,31 +110,82 @@ public class PPU {
         return data;
     }
 
-    public short readOamData() {
-        return oamData[oamAddr]
-    }
-
-    public void writeToMask(short/* u8 */ value) {
-        mask.update(unsignByte(value));
-    }
-
     public void writeToOamAddr(int value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeToOamAddr'");
+        oamAddr = unsignByte(value);
     }
 
     public void writeToOamData(int value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeToOamData'");
+        oamData[oamAddr] = unsignByte(value);
+        oamAddr = unsignByte((oamAddr + 1) % oamData.length);
+    }
+
+    public short readOamData() {
+        return oamData[oamAddr];
     }
 
     public void writeToScroll(int value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeToScroll'");
+        scroll.write(unsignByte(value));
     }
 
-    public void writeOamDma(short[] buffer) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'writeOamDma'");
+    public void writeToPPUAddr(short /* u8 */ value) {
+        addr.update(value);
+    }
+
+    public void writeToData(short/* u8 */ value) {
+        int addrTmp = addr.get();
+        try {
+            if (addrTmp <= 0x1FFF) {
+                throw new Exception("Attempt to write to chr rom space" + addrTmp);
+            } else if (addrTmp <= 0x2FFF) {
+                vram[mirrorVramAddr(addrTmp)] = value;
+            } else if (addrTmp <= 0x3EFF) {
+                throw new Exception("Addr " + addrTmp + " shouldn't be used in reality");
+            } else if (addrTmp == 0x3F10 || addrTmp == 0x3F14 || addrTmp == 0x3F18 || addrTmp == 0x3F1C) {
+                int addrMirror = addrTmp - 0x10;
+                palleteTable[addrMirror - 0x3F00] = value;
+            } else if (addrTmp <= 0x3FFF) {
+                palleteTable[addrTmp - 0x3F00] = value;
+            } else {
+                throw new UnexpectedAccessException(addrTmp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        incrementVramAddr();
+    }
+
+    public short /* u8 */ readData() {
+        var addrTmp = addr.get();
+        incrementVramAddr();
+        try {
+            if (addrTmp <= 0x1FFF) {
+                short result = internalDataBuf;
+                internalDataBuf = unsignByte(chrRom[addrTmp]);
+                return unsignByte(result);
+            } else if (addrTmp <= 0x2FFF) {
+                short result = internalDataBuf;
+                internalDataBuf = unsignByte(vram[mirrorVramAddr(addrTmp)]);
+                return unsignByte(result);
+            } else if (addrTmp <= 0x3EFF) {
+                throw new Exception("Addr " + addrTmp + " shouldn't be used in reality");
+            } else if (addrTmp == 0x3F10 || addrTmp == 0x3F14 || addrTmp == 0x3F18 || addrTmp == 0x3F1C) {
+                int addrMirror = addrTmp - 0x10;
+                return unsignByte(palleteTable[addrMirror - 0x3F00]);
+            } else if (addrTmp <= 0x3FFF) {
+                return unsignByte(palleteTable[addrTmp - 0x3F00]);
+            } else {
+                throw new UnexpectedAccessException(addrTmp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    public void writeOamDma(short[]/* u8 */ data) {
+        for (short x : data) {
+            oamData[oamAddr] = x;
+            oamAddr = unsignByte((oamAddr + 1) % oamData.length);
+        }
     }
 }
