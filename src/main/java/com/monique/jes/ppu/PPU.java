@@ -116,7 +116,7 @@ public class PPU {
     }
 
     public short readOamData() {
-        return oamData[oamAddr]
+        return oamData[oamAddr];
     }
 
     public void writeToMask(short/* u8 */ value) {

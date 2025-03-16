@@ -17,5 +17,7 @@ public class SnakeGame {
             cpu.memWrite(0xFE, (int) Math.floor(Math.random() * 16) + 1);
             screen.update();
         });
+
+        screen.close();
     }
 }
