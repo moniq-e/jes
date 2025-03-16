@@ -79,7 +79,8 @@ public class Bus implements Memory {
     public void memWrite(int addr, int value) {
         if (addr >= RAM && addr <= RAM_MIRRORS_END) {
             int mirrorDownAddr = addr & 0x07FF;
-            cpuVram[mirrorDownAddr] = (short) (value & 0xFF);
+            cpuVram[mirrorDownAddr] = unsignByte(value);
+
         } else if (addr == 0x2000) {
             ppu.writeToCtrl(unsignByte(value));
         } else if (addr == 0x2001) {
@@ -93,7 +94,7 @@ public class Bus implements Memory {
         } else if (addr == 0x2005) {
             ppu.writeToScroll(value);
         } else if (addr == 0x2006) {
-            ppu.writeToPPUAddr((short) (value & 0xFF));
+            ppu.writeToPPUAddr(unsignByte(value));
         } else if (addr == 0x2007) {
             ppu.writeToData(unsignByte(value));
         } else if (addr >= 0x2008 && addr <= PPU_REGISTERS_MIRRORS_END) {

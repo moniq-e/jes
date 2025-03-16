@@ -4,14 +4,14 @@ import com.monique.jes.utils.bitflag.Flag;
 import com.monique.jes.utils.bitflag.InnerFlag;
 
 public enum CPUFlag implements Flag {
-    N(InnerFlag.F1),
-    V(InnerFlag.F2),
-    B(InnerFlag.F3),
-    B2(InnerFlag.F4),
-    D(InnerFlag.F5),
-    I(InnerFlag.F6),
-    Z(InnerFlag.F7), 
-    C(InnerFlag.F8);
+    NEGATIVE(InnerFlag.F1),
+    OVERFLOW(InnerFlag.F2),
+    BREAK2(InnerFlag.F3),
+    BREAK(InnerFlag.F4),
+    DECIMAL(InnerFlag.F5),
+    INTERRUPT(InnerFlag.F6),
+    ZERO(InnerFlag.F7), 
+    CARRY(InnerFlag.F8);
 
     private final InnerFlag FLAG;
 

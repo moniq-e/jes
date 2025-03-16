@@ -88,4 +88,8 @@ public class SnakeScreen {
         panel.revalidate();
         panel.repaint();
     }
+
+    public void close() {
+        frame.dispose();
+    }
 }
