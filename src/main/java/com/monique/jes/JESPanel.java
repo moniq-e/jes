@@ -1,5 +1,6 @@
 package com.monique.jes;
 
+import static com.monique.jes.utils.Unsign.unsignByte;
 import static com.monique.jes.utils.Unsign.unsignShort;
 
 import java.awt.Color;
@@ -39,9 +40,9 @@ public class JESPanel extends JPanel {
             int tileY = i / 32;
             short[] tile = Arrays.copyOfRange(ppu.getChrRom(), (bank + tileBase * 16), (bank + tileBase * 16 + 15));
 
-            for (int y = 0; y < 7; y++) {
-                short upper = tile[y];
-                short lower = tile[y + 8];
+            for (int y = 0; y < 8; y++) {
+                short upper = unsignByte(tile[y]);
+                short lower = unsignByte(tile[y + 7]);
 
                 for (int x = 7; x >= 0; x--) {
                     short value = (short) ((1 & upper) << 1 | (1 & lower));
@@ -74,9 +75,6 @@ public class JESPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
-
-        System.out.println("executing paint");
-
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.drawImage(this.texture.getData(), 0, 0, SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE, null);
