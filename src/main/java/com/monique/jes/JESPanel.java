@@ -20,14 +20,14 @@ public class JESPanel extends JPanel {
     private final int SCALE = 3;
     private final int SCREEN_WIDTH = 256;
     private final int SCREEN_HEIGHT = 240;
-    private BufferedImage texture;
+    private Frame texture;
 
-    public JESPanel() {
+    public JESPanel(Frame texture) {
         this.setPreferredSize(new Dimension(SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE));
         this.setBackground(Color.BLACK);
         this.setDoubleBuffered(true);
         this.setLayout(null);
-        texture = new BufferedImage(SCREEN_WIDTH, SCREEN_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        this.texture = texture;
     }
 
     public void render(PPU ppu, Frame frame) {
@@ -79,6 +79,6 @@ public class JESPanel extends JPanel {
 
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(this.texture, 0, 0, SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE, null);
+        g2.drawImage(this.texture.getData(), 0, 0, SCREEN_WIDTH * SCALE, SCREEN_HEIGHT * SCALE, null);
     }
 }

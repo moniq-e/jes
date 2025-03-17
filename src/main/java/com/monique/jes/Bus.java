@@ -62,6 +62,8 @@ public class Bus implements Memory {
 
     @Override
     public short memRead(int addr) {
+        addr = unsignShort(addr);
+
         if (addr >= RAM && addr <= RAM_MIRRORS_END) {
 
             int mirrorDownAddr = addr & 0x07FF;
@@ -87,13 +89,15 @@ public class Bus implements Memory {
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             return readPrgRom(addr);
         } else {
-            System.out.printf("Ignoring mem access at %d.\n", addr);
+            System.out.printf("Ignoring mem access at %x.\n", addr);
         }
         return 0;
     }
 
     @Override
     public void memWrite(int addr, int value) {
+        addr = unsignShort(addr);
+
         if (addr >= RAM && addr <= RAM_MIRRORS_END) {
             int mirrorDownAddr = addr & 0x07FF;
             cpuVram[mirrorDownAddr] = unsignByte(value);
@@ -135,7 +139,7 @@ public class Bus implements Memory {
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             System.err.println("Attempt to write to Cartridge ROM space.");
         } else {
-            System.out.printf("Ignoring mem write-access at %d\n.", addr);
+            System.out.printf("Ignoring mem write-access at %x.\n", addr);
         }
     }
 

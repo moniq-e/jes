@@ -11,14 +11,14 @@ public class InputHandler extends KeyAdapter {
     public InputHandler(Joypad joypad) {
         this.joypad = joypad;
 
-        keyMap.put(KeyEvent.VK_W, JoypadButton.UP);
-        keyMap.put(KeyEvent.VK_A, JoypadButton.LEFT);
-        keyMap.put(KeyEvent.VK_S, JoypadButton.DOWN);
-        keyMap.put(KeyEvent.VK_D, JoypadButton.RIGHT);
+        keyMap.put(KeyEvent.VK_UP, JoypadButton.UP);
+        keyMap.put(KeyEvent.VK_LEFT, JoypadButton.LEFT);
+        keyMap.put(KeyEvent.VK_DOWN, JoypadButton.DOWN);
+        keyMap.put(KeyEvent.VK_RIGHT, JoypadButton.RIGHT);
         keyMap.put(KeyEvent.VK_SPACE, JoypadButton.SELECT);
         keyMap.put(KeyEvent.VK_ENTER, JoypadButton.START);
-        keyMap.put(KeyEvent.VK_K, JoypadButton.A);
-        keyMap.put(KeyEvent.VK_L, JoypadButton.B);
+        keyMap.put(KeyEvent.VK_X, JoypadButton.A);
+        keyMap.put(KeyEvent.VK_Z, JoypadButton.B);
     }
 
     @Override
