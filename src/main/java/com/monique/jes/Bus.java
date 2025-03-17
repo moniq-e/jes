@@ -62,8 +62,6 @@ public class Bus implements Memory {
 
     @Override
     public short memRead(int addr) {
-        addr = unsignShort(addr);
-
         if (addr >= RAM && addr <= RAM_MIRRORS_END) {
 
             int mirrorDownAddr = addr & 0x07FF;
@@ -96,8 +94,6 @@ public class Bus implements Memory {
 
     @Override
     public void memWrite(int addr, int value) {
-        addr = unsignShort(addr);
-
         if (addr >= RAM && addr <= RAM_MIRRORS_END) {
             int mirrorDownAddr = addr & 0x07FF;
             cpuVram[mirrorDownAddr] = unsignByte(value);
@@ -128,7 +124,7 @@ public class Bus implements Memory {
             var buffer = new short[256];
             var hi = (value << 8);
             for (int i = 0; i < 256; i++) {
-                buffer[i] = memRead(hi + i);
+                buffer[i] = memRead(unsignShort(hi + i));
             }
             ppu.writeOamDma(buffer);
 

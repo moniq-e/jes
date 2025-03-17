@@ -560,12 +560,12 @@ public class CPU implements Memory {
 
     @Override
     public short memRead(int addr) {
-        return bus.memRead(addr);
+        return bus.memRead(unsignShort(addr));
     }
 
     @Override
     public void memWrite(int addr, int value) {
-        bus.memWrite(addr, value);
+        bus.memWrite(unsignShort(addr), value);
     }
 
     public Pair<Integer, Boolean> getOperandAddr(AddressingMode mode) {
