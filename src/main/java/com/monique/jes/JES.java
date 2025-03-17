@@ -1,18 +1,40 @@
 package com.monique.jes;
 
+import java.io.InputStream;
+
+import javax.swing.JFrame;
+
 import com.monique.jes.cpu.CPU;
+import com.monique.jes.joypad.InputHandler;
+import com.monique.jes.ppu.Frame;
 import com.monique.jes.utils.Rom;
 
-public class JES {
-    private JES() {
+public class JES extends JFrame {
+    JES() {
+        super("JES");
+
         try {
-            var rom = getClass().getResourceAsStream("/snake.nes");
+            InputStream romFile = getClass().getResourceAsStream("/pacman.nes");
 
-            var bus = new Bus(new Rom(rom), b -> {
-                
+            Frame frame = new Frame();
+
+            JESPanel panel = new JESPanel();
+            Bus bus = new Bus(new Rom(romFile), b -> {
+                panel.render(b.getPPU(), frame);
             });
+            
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            setResizable(false);
 
-            var cpu = new CPU(bus);
+            add(panel);
+            pack();
+            addKeyListener(new InputHandler(bus.getJoypad()));
+            setFocusable(true);
+
+            setLocationRelativeTo(null);
+            setVisible(true);
+            
+            CPU cpu = new CPU(bus);
             cpu.reset();
             cpu.run();
         } catch (Exception e) {

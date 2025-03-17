@@ -19,6 +19,7 @@ public class Bus implements Memory {
     private short[] cpuVram; // 2048 bytes
     private Rom rom;
     private PPU ppu;
+
     private Joypad joypad;
     private Consumer<Bus> callback;
 
@@ -86,7 +87,7 @@ public class Bus implements Memory {
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             return readPrgRom(addr);
         } else {
-            System.out.printf("Ignoring mem access at %d\n.", addr);
+            System.out.printf("Ignoring mem access at %d.\n", addr);
         }
         return 0;
     }
@@ -140,6 +141,10 @@ public class Bus implements Memory {
 
     public Joypad getJoypad() {
         return joypad;
+    }
+
+    public PPU getPPU() {
+        return ppu;
     }
 
     public Optional<Short> pollNMIStatus() {

@@ -43,6 +43,8 @@ public class PPU {
         mask = new MaskRegister();
         scroll = new ScrollRegister();
         status = new StatusRegister();
+
+        nmiInterrupt = Optional.empty();
     }
 
     public boolean tick(short/* u8 */ cycles) {
@@ -52,14 +54,17 @@ public class PPU {
             this.scanline += 1;
 
             if (this.scanline == 241) {
+                status.setVBlankStatus(true);
+                status.setSpriteZeroHit(false);
                 if (this.ctrl.getBitsFlag(ControlFlag.GENERATE_NMI)) {
-                    status.setVBlankStatus(true);
-                    throw new UnsupportedOperationException("TODO: Should trigger NMI interrupt");
+                    nmiInterrupt = Optional.of((short) 1);
                 }
             }
 
             if (this.scanline >= 262) {
                 scanline = 0;
+                nmiInterrupt = Optional.empty();
+                status.setSpriteZeroHit(false);
                 status.resetVBlankStatus();
                 return true;
             }
@@ -98,7 +103,12 @@ public class PPU {
     }
 
     public void writeToCtrl(short /* u8 */ value) {
+        boolean beforeNMIStatus = ctrl.getBitsFlag(ControlFlag.GENERATE_NMI);
         ctrl.update(value);
+        if (!beforeNMIStatus && ctrl.getBitsFlag(ControlFlag.GENERATE_NMI) && status.isInVBlank()) {
+            nmiInterrupt = Optional.of((short) 1);
+        }
+
     }
 
     public void writeToMask(short/* u8 */ value) {
@@ -193,6 +203,66 @@ public class PPU {
     }
 
     public Optional<Short> pollNmiInterrupt() {
+        return nmiInterrupt;
+    }
+
+    public AddrRegister getAddr() {
+        return addr;
+    }
+
+    public ControlRegister getCtrl() {
+        return ctrl;
+    }
+
+    public MaskRegister getMask() {
+        return mask;
+    }
+
+    public ScrollRegister getScroll() {
+        return scroll;
+    }
+
+    public StatusRegister getStatus() {
+        return status;
+    }
+
+    public short getInternalDataBuf() {
+        return internalDataBuf;
+    }
+
+    public short getOamAddr() {
+        return oamAddr;
+    }
+
+    public short[] getChrRom() {
+        return chrRom;
+    }
+
+    public short[] getPalleteTable() {
+        return palleteTable;
+    }
+
+    public short[] getVram() {
+        return vram;
+    }
+
+    public short[] getOamData() {
+        return oamData;
+    }
+
+    public Mirroring getMirroring() {
+        return mirroring;
+    }
+
+    public int getScanline() {
+        return scanline;
+    }
+
+    public int getCycles() {
+        return cycles;
+    }
+
+    public Optional<Short> getNmiInterrupt() {
         return nmiInterrupt;
     }
 }
