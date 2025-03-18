@@ -41,7 +41,7 @@ public interface Trace {
                     case ZeroPageX -> String.format( "$%02x,X @ %02x = %02x", address, pair.getAddr(), pair.getValue());
                     case ZeroPageY -> String.format("$%02x,Y @ %02x = %02x", address, pair.getAddr(), pair.getValue());
                     case IndirectX -> String.format("($%02x,X) @ %02x = %04x = %02x", address, (address + cpu.getIrx()), pair.getAddr(), pair.getValue());
-                    case IndirectY -> String.format("($%02x),Y = %04x @ %04x = %02x", address, (pair.getAddr() - cpu.getIry()), pair.getAddr(), pair.getValue());
+                    case IndirectY -> String.format("($%02x),Y = %04x @ %04x = %02x", address, (pair.getAddr() - cpu.getIry()) & 0xFFFF, pair.getAddr(), pair.getValue());
                     case NoneAddressing -> {
                         // assuming local jumps: BNE, BVS, etc....
                         int address2 = begin + 2 + ((byte) address);
