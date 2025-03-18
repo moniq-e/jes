@@ -9,7 +9,7 @@ public class AddrRegister {
     private boolean hiPtr;
 
     public AddrRegister() {
-        value = new Pair<>((short) 0, (short) 0); // high byte first, low byte second
+        value = Pair.of((short) 0, (short) 0); // high byte first, low byte second
         hiPtr = true;
     }
 
@@ -20,7 +20,7 @@ public class AddrRegister {
         value.setSecond(unsignByte(data & 0xFF));
     }
     public int get() {
-        return unsignShort((unsignShort(value.getFirst()) << 8) | unsignShort(value.getFirst()));
+        return unsignShort((unsignShort(value.getFirst()) << 8) | unsignShort(value.getSecond()));
     }
 
     public void update(short /* u8 */ data) {

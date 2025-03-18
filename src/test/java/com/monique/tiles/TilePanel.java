@@ -55,9 +55,9 @@ public class TilePanel extends JPanel {
                 tileY += 10;
                 tileX = 0;
             }
-            short[] tile = Arrays.copyOfRange(chrRom, (bank + tileN * 16), (bank + tileN * 16 + 15));
+            short[] tile = Arrays.copyOfRange(chrRom, (bank + tileN * 16), (bank + tileN * 16 + 16));
 
-            for (int y = 0; y < 7; y++) {
+            for (int y = 0; y <= 7; y++) {
                 short upper = tile[y];
                 short lower = tile[y + 8];
 

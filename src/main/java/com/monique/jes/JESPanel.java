@@ -35,17 +35,17 @@ public class JESPanel extends JPanel {
         int bank = ppu.getCtrl().getBitsFlag(ControlFlag.BACKGROUND_PATTERN_ADDR) ? 1 : 0;
         
         for (int i = 0; i < 0x03C0; i++) {
-            int tileBase = unsignShort(ppu.getVram()[i]);
-            int tileX = i % 32;
-            int tileY = i / 32;
-            short[] tile = Arrays.copyOfRange(ppu.getChrRom(), (bank + tileBase * 16), (bank + tileBase * 16 + 15));
+            int tileBase = ppu.memRead(i);
+            int tileColumn = i % 32;
+            int tileRow = i / 32;
+            short[] tile = Arrays.copyOfRange(ppu.getChrRom(), bank + tileBase * 16, bank + tileBase * 16 + 16);
 
-            for (int y = 0; y < 8; y++) {
+            for (int y = 0; y <= 7; y++) {
                 short upper = unsignByte(tile[y]);
-                short lower = unsignByte(tile[y + 7]);
+                short lower = unsignByte(tile[y + 8]);
 
                 for (int x = 7; x >= 0; x--) {
-                    short value = (short) ((1 & upper) << 1 | (1 & lower));
+                    int value = ((1 & upper) << 1 | (1 & lower));
                     upper = (short) (upper >> 1);
                     lower = (short) (lower >> 1);
 
@@ -64,7 +64,7 @@ public class JESPanel extends JPanel {
                         }
                     };
 
-                    frame.setPixel(tileX*8 + x, tileY*8 + y, rgb);
+                    frame.setPixel(tileColumn*8 + x, tileRow*8 + y, rgb);
                 }
             }
         }

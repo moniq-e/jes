@@ -10,8 +10,9 @@ import com.monique.jes.ppu.registers.ControlRegister;
 import com.monique.jes.ppu.registers.MaskRegister;
 import com.monique.jes.ppu.registers.ScrollRegister;
 import com.monique.jes.ppu.registers.StatusRegister;
+import com.monique.jes.utils.Memory;
 
-public class PPU {
+public class PPU implements Memory {
     private AddrRegister addr;
     private ControlRegister ctrl;
     private MaskRegister mask;
@@ -150,7 +151,7 @@ public class PPU {
             if (addrTmp <= 0x1FFF) {
                 throw new Exception("Attempt to write to chr rom space" + addrTmp);
             } else if (addrTmp <= 0x2FFF) {
-                vram[mirrorVramAddr(addrTmp)] = value;
+                memWrite(mirrorVramAddr(addrTmp), value);
             } else if (addrTmp <= 0x3EFF) {
                 throw new Exception("Addr " + addrTmp + " shouldn't be used in reality");
             } else if (addrTmp == 0x3F10 || addrTmp == 0x3F14 || addrTmp == 0x3F18 || addrTmp == 0x3F1C) {
@@ -242,10 +243,6 @@ public class PPU {
         return palleteTable;
     }
 
-    public short[] getVram() {
-        return vram;
-    }
-
     public short[] getOamData() {
         return oamData;
     }
@@ -264,5 +261,71 @@ public class PPU {
 
     public Optional<Short> getNmiInterrupt() {
         return nmiInterrupt;
+    }
+
+    public void setAddr(AddrRegister addr) {
+        this.addr = addr;
+    }
+
+    public void setCtrl(ControlRegister ctrl) {
+        this.ctrl = ctrl;
+    }
+
+    public void setMask(MaskRegister mask) {
+        this.mask = mask;
+    }
+
+    public void setScroll(ScrollRegister scroll) {
+        this.scroll = scroll;
+    }
+
+    public void setStatus(StatusRegister status) {
+        this.status = status;
+    }
+
+    public void setInternalDataBuf(short internalDataBuf) {
+        this.internalDataBuf = internalDataBuf;
+    }
+
+    public void setOamAddr(short oamAddr) {
+        this.oamAddr = oamAddr;
+    }
+
+    public void setChrRom(short[] chrRom) {
+        this.chrRom = chrRom;
+    }
+
+    public void setPalleteTable(short[] palleteTable) {
+        this.palleteTable = palleteTable;
+    }
+
+    public void setOamData(short[] oamData) {
+        this.oamData = oamData;
+    }
+
+    public void setMirroring(Mirroring mirroring) {
+        this.mirroring = mirroring;
+    }
+
+    public void setScanline(int scanline) {
+        this.scanline = scanline;
+    }
+
+    public void setCycles(int cycles) {
+        this.cycles = cycles;
+    }
+
+    public void setNmiInterrupt(Optional<Short> nmiInterrupt) {
+        this.nmiInterrupt = nmiInterrupt;
+    }
+
+    @Override
+    public short memRead(int addr) {
+        return unsignByte(vram[addr]);
+    }
+
+    @Override
+    public void memWrite(int addr, int value) {
+        vram[addr] = unsignByte(value);
     }
 }
