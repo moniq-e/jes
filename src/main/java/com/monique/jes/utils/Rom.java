@@ -2,22 +2,22 @@ package com.monique.jes.utils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Optional;
 
 import com.monique.jes.ppu.Mirroring;
 
 public class Rom {
-    public final short[] NES_TAG = new short[]{ 0x4E, 0x45, 0x53, 0x1A };
-    public final int PRG_ROM_PAGE_SIZE = 16384;
-    public final int CHR_ROM_PAGE_SIZE = 8192;
+    public static final short[] NES_TAG = new short[]{ 0x4E, 0x45, 0x53, 0x1A };
+    public static final int PRG_ROM_PAGE_SIZE = 16384;
+    public static final int CHR_ROM_PAGE_SIZE = 8192;
 
     public final short[] prgRom;
     public final short[] chrRom;
     public final short mapper;
     public final Mirroring mirroring;
 
-    public Rom(InputStream unparsedRaw) throws Exception {
-        var raw = rawParser(unparsedRaw);
-
+    public Rom(short[] raw) throws Exception {
         if (!isFileINES(raw)) {
             throw new Exception("File is not in iNES file format");
         }
@@ -70,7 +70,56 @@ public class Rom {
         return res;
     }
 
-    public short[] rawParser(InputStream raw) {
+    public static Rom of(InputStream unparsedRaw) throws Exception {
+        return new Rom(rawParser(unparsedRaw));
+    }
+
+    public static Rom testRomContaining(short[] program) throws Exception {
+        var pgpRomContents = program;
+        var resized = new short[2 * PRG_ROM_PAGE_SIZE];
+        for (int i = 0; i < pgpRomContents.length; i++) {
+            resized[i] = pgpRomContents[i];
+        }
+
+        var chrRom = new short[CHR_ROM_PAGE_SIZE];
+        Arrays.fill(chrRom, (short) 2);
+
+        var testRom = createRom(new TestRom(
+            new short[]{ 0x4E, 0x45, 0x53, 0x1A, 0x02, 0x01, 0x31, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            Optional.empty(),
+            resized,
+            chrRom
+        ));
+        return new Rom(testRom);
+    }
+
+    private static short[] createRom(TestRom rom) {
+        var res = new ArrayList<Short>();
+
+        for (int i = 0; i < rom.header.length; i++) {
+            res.add(rom.header[i]);
+        }
+        if (rom.trainer.isPresent()) {
+            var trainer = rom.trainer.get();
+            for (int i = 0; i < trainer.length; i++) {
+                res.add(trainer[i]);
+            }
+        }
+        for (int i = 0; i < rom.pgpRom.length; i++) {
+            res.add(rom.pgpRom[i]);
+        }
+        for (int i = 0; i < rom.chrRom.length; i++) {
+            res.add(rom.chrRom[i]);
+        }
+
+        var array = new short[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            array[i] = res.get(i).shortValue();
+        }
+        return array;
+    }
+
+    public static short[] rawParser(InputStream raw) {
         var parsedRaw = new ArrayList<Short>();
 
         try {
@@ -88,5 +137,19 @@ public class Rom {
             array[i] = parsedRaw.get(i).shortValue();
         }
         return array;
+    }
+
+    private static class TestRom {
+        public final short[] header;
+        public final Optional<short[]> trainer;
+        public final short[] pgpRom;
+        public final short[] chrRom;
+
+        public TestRom(short[] header, Optional<short[]> trainer, short[] pgpRom, short[] chrRom) {
+            this.header = header;
+            this.trainer = trainer;
+            this.pgpRom = pgpRom;
+            this.chrRom = chrRom;
+        }
     }
 }

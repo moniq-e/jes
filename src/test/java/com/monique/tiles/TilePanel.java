@@ -23,7 +23,7 @@ public class TilePanel extends JPanel {
     public TilePanel() {
         Rom rom = null;
         try {
-            rom = new Rom(getClass().getResourceAsStream("/mariobros.nes"));
+            rom = Rom.of(getClass().getResourceAsStream("/mariobros.nes"));
         } catch (Exception e) {
             e.printStackTrace();
         }

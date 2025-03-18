@@ -19,7 +19,7 @@ public class JES extends JFrame {
             Frame frame = new Frame();
 
             JESPanel panel = new JESPanel(frame);
-            Bus bus = new Bus(new Rom(romFile), b -> {
+            Bus bus = new Bus(Rom.of(romFile), b -> {
                 panel.render(b.getPPU(), frame);
             });
             
