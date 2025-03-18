@@ -74,7 +74,7 @@ public class Rom {
         return new Rom(rawParser(unparsedRaw));
     }
 
-    public static Rom testRomContaining(short[] program) throws Exception {
+    public static Rom testRomContaining(short[] program, boolean trainer) throws Exception {
         var resized = new short[2 * PRG_ROM_PAGE_SIZE];
         for (int i = 0; i < program.length; i++) {
             resized[i] = program[i];
@@ -84,12 +84,16 @@ public class Rom {
         Arrays.fill(chrRom, (short) 2);
 
         var testRom = createRom(new TestRom(
-            new short[]{ 0x4E, 0x45, 0x53, 0x1A, 0x02, 0x01, 0x31, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-            Optional.empty(),
+            new short[]{ 0x4E, 0x45, 0x53, 0x1A, 0x02, 0x01, (short) (0x31 | (trainer ? 4 : 0)), 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            trainer ? Optional.of(new short[512]) : Optional.empty(),
             resized,
             chrRom
         ));
         return new Rom(testRom);
+    }
+
+    public static Rom testRomContaining(short[] program) throws Exception {
+        return testRomContaining(program, false);
     }
 
     private static short[] createRom(TestRom rom) {
@@ -118,7 +122,7 @@ public class Rom {
         return array;
     }
 
-    public static short[] rawParser(InputStream raw) {
+    private static short[] rawParser(InputStream raw) {
         var parsedRaw = new ArrayList<Short>();
 
         try {

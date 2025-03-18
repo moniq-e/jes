@@ -44,6 +44,14 @@ public class JESTest implements Trace {
     }
 
     @Test
+    public void testWithTrainer() throws Exception {
+        var rom = Rom.testRomContaining(new short[0], true);
+
+        assertEquals(rom.mapper, 3);
+        assertEquals(rom.mirroring, Mirroring.VERTICAL);
+    }
+
+    @Test
     public void testTestRom() throws Exception {
         var rom = Rom.testRomContaining(new short[0]);
 
