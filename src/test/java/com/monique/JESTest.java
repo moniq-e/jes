@@ -16,7 +16,7 @@ public class JESTest implements Trace {
     public final Rom TEST_ROM;
 
     public JESTest() throws Exception {
-        TEST_ROM = new Rom(getClass().getResourceAsStream("/nestest.nes"));
+        TEST_ROM = Rom.of(getClass().getResourceAsStream("/nestest.nes"));
     }
 
     @Test
@@ -71,6 +71,13 @@ public class JESTest implements Trace {
     }
 
     @Test
+    public void testMemReadWriteToRam() {
+        var bus = new Bus(TEST_ROM);
+        bus.memWrite(0x01, 0x55);
+        assertEquals(bus.memRead(0x01), 0x55);
+    }
+
+    @Test
     public void testFormatMemAccess() {
         var bus = new Bus(TEST_ROM);
         // ORA ($33), Y
@@ -100,9 +107,9 @@ public class JESTest implements Trace {
     }
 
     @Test
-    public void testImmediateLDA() {
-        var cpu = new CPU(new Bus(null));
-        cpu.loadAndRun(new short[]{0xA9, 0x05, 0x00});
+    public void testImmediateLDA() throws Exception {
+        var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xA9, 0x05, 0x00})));
+        cpu.run();
 
         assertEquals(cpu.getAcc(), 0x05);
         assertEquals((cpu.getStatus() & 0x2), 0);
@@ -110,27 +117,25 @@ public class JESTest implements Trace {
     }
 
     @Test
-    public void testLDAZeroFlag() {
-        var cpu = new CPU(new Bus(null));
-        cpu.loadAndRun(new short[]{0xA9, 0x00, 0x00});
+    public void testLDAZeroFlag() throws Exception {
+        var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xA9, 0x00, 0x00})));
+        cpu.run();
 
         assertEquals((cpu.getStatus() & 0x2), 0x2);
     }
 
     @Test
-    public void testLDAFromMemory() {
-        var cpu = new CPU(new Bus(null));
+    public void testLDAFromMemory() throws Exception {
+        var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xA5, 0x10, 0x00})));
         cpu.memWrite(0x10, 0x55);
-        cpu.loadAndRun(new short[]{0xA5, 0x10, 0x00});
+        cpu.run();
 
         assertEquals(cpu.getAcc(), 0x55);
     }
 
     @Test
-    public void testTAX() {
-        var cpu = new CPU(new Bus(null));
-        cpu.loadRom(new short[]{0xAA, 0x00});
-        cpu.reset();
+    public void testTAX() throws Exception {
+        var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xAA, 0x00})));
         cpu.setAcc((short) 0xA);
         cpu.run();
 
@@ -138,18 +143,16 @@ public class JESTest implements Trace {
     }
 
     @Test
-    public void test5OpsWorkingTogether() {
-        var cpu = new CPU(new Bus(null));
-        cpu.loadAndRun(new short[]{0xA9, 0xC0, 0xAA, 0xE8, 0x00});
+    public void test5OpsWorkingTogether() throws Exception {
+        var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xA9, 0xC0, 0xAA, 0xE8, 0x00})));
+        cpu.run();
 
         assertEquals(cpu.getIrx(), 0xC1);
     }
 
     @Test
-    public void testInxOverflow() {
-        var cpu = new CPU(new Bus(null));
-        cpu.loadRom(new short[]{0xE8, 0xE8, 0x00});
-        cpu.reset();
+    public void testInxOverflow() throws Exception {
+        var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xE8, 0xE8, 0x00})));
         cpu.setIrx((short) 0xFF);
         cpu.run();
 
