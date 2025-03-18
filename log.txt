@@ -3011,23 +3011,22 @@ D938  85 97     STA $97 = 00                    A:FF X:65 Y:00 P:A5 SP:FB
 D93A  85 98     STA $98 = 00                    A:FF X:65 Y:00 P:A5 SP:FB
 D93C  24 98     BIT $98 = FF                    A:FF X:65 Y:00 P:A5 SP:FB
 D93E  A0 34     LDY #$34                        A:FF X:65 Y:00 P:E5 SP:FB
-D940  B1 97     LDA ($97),Y = FFFF @ 10033 = 00 A:FF X:65 Y:34 P:65 SP:FB
-D942  C9 A3     CMP #$A3                        A:00 X:65 Y:34 P:67 SP:FB
-D944  D0 02     BNE $D948                       A:00 X:65 Y:34 P:64 SP:FB
-D948  A9 EB     LDA #$EB                        A:00 X:65 Y:34 P:64 SP:FB
-D94A  85 00     STA $00 = E5                    A:EB X:65 Y:34 P:E4 SP:FB
-D94C  A5 00     LDA $00 = EB                    A:EB X:65 Y:34 P:E4 SP:FB
-D94E  48        PHA                             A:EB X:65 Y:34 P:E4 SP:FB
-D94F  A9 46     LDA #$46                        A:EB X:65 Y:34 P:E4 SP:FA
-D951  85 FF     STA $FF = 00                    A:46 X:65 Y:34 P:64 SP:FA
-D953  A9 01     LDA #$01                        A:46 X:65 Y:34 P:64 SP:FA
-D955  85 00     STA $00 = EB                    A:01 X:65 Y:34 P:64 SP:FA
-D957  A0 FF     LDY #$FF                        A:01 X:65 Y:34 P:64 SP:FA
-D959  B1 FF     LDA ($FF),Y = 0046 @ 0145 = 00  A:01 X:65 Y:FF P:E4 SP:FA
-D95B  C9 12     CMP #$12                        A:00 X:65 Y:FF P:66 SP:FA
+D940  B1 97     LDA ($97),Y = FFFFFFFF @ 0033 = A3 A:FF X:65 Y:34 P:65 SP:FB
+D942  C9 A3     CMP #$A3                        A:A3 X:65 Y:34 P:E5 SP:FB
+D944  D0 02     BNE $D948                       A:A3 X:65 Y:34 P:67 SP:FB
+D946  B0 04     BCS $D94C                       A:A3 X:65 Y:34 P:67 SP:FB
+D94C  A5 00     LDA $00 = E5                    A:A3 X:65 Y:34 P:67 SP:FB
+D94E  48        PHA                             A:E5 X:65 Y:34 P:E5 SP:FB
+D94F  A9 46     LDA #$46                        A:E5 X:65 Y:34 P:E5 SP:FA
+D951  85 FF     STA $FF = 00                    A:46 X:65 Y:34 P:65 SP:FA
+D953  A9 01     LDA #$01                        A:46 X:65 Y:34 P:65 SP:FA
+D955  85 00     STA $00 = E5                    A:01 X:65 Y:34 P:65 SP:FA
+D957  A0 FF     LDY #$FF                        A:01 X:65 Y:34 P:65 SP:FA
+D959  B1 FF     LDA ($FF),Y = 0046 @ 0145 = 00  A:01 X:65 Y:FF P:E5 SP:FA
+D95B  C9 12     CMP #$12                        A:00 X:65 Y:FF P:67 SP:FA
 D95D  F0 04     BEQ $D963                       A:00 X:65 Y:FF P:E4 SP:FA
 D95F  68        PLA                             A:00 X:65 Y:FF P:E4 SP:FA
-D960  A9 EC     LDA #$EC                        A:EB X:65 Y:FF P:E4 SP:FB
+D960  A9 EC     LDA #$EC                        A:E5 X:65 Y:FF P:E4 SP:FB
 D962  48        PHA                             A:EC X:65 Y:FF P:E4 SP:FB
 D963  68        PLA                             A:EC X:65 Y:FF P:E4 SP:FA
 D964  85 00     STA $00 = 01                    A:EC X:65 Y:FF P:E4 SP:FB

@@ -75,10 +75,9 @@ public class Rom {
     }
 
     public static Rom testRomContaining(short[] program) throws Exception {
-        var pgpRomContents = program;
         var resized = new short[2 * PRG_ROM_PAGE_SIZE];
-        for (int i = 0; i < pgpRomContents.length; i++) {
-            resized[i] = pgpRomContents[i];
+        for (int i = 0; i < program.length; i++) {
+            resized[i] = program[i];
         }
 
         var chrRom = new short[CHR_ROM_PAGE_SIZE];

@@ -13,7 +13,7 @@ import com.monique.jes.utils.interrupt.Interrupt;
 
 //21441960 Hz
 public class CPU implements Memory {
-    private final int DELTA_TIME = 70000;
+    private final int DELTA_TIME = 0;//70000;
     private Bus bus;
     private int pc; // 16 bit
     private short sp; // 8 bit
@@ -25,7 +25,7 @@ public class CPU implements Memory {
     public CPU(Bus bus) {
         //mem = new short[0xFFFF];
         this.bus = bus;
-        pc = 0;
+        pc = 0x8000;
         sp = 0xFD;
         acc = 0;
         pstatus = new BitFlag((short) 0x24); // 0010 0100

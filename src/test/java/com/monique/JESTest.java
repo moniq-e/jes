@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.monique.jes.Bus;
 import com.monique.jes.cpu.CPU;
+import com.monique.jes.ppu.Mirroring;
 import com.monique.jes.utils.Rom;
 
 public class JESTest implements Trace {
@@ -43,6 +44,21 @@ public class JESTest implements Trace {
     }
 
     @Test
+    public void testTestRom() throws Exception {
+        var rom = Rom.testRomContaining(new short[0]);
+
+        assertEquals(rom.mapper, 3);
+        assertEquals(rom.mirroring, Mirroring.VERTICAL);
+    }
+
+    @Test
+    public void testMemReadWriteToRam() {
+        var bus = new Bus(TEST_ROM);
+        bus.memWrite(0x01, 0x55);
+        assertEquals(bus.memRead(0x01), 0x55);
+    }
+
+    @Test
     public void testFormatTrace() {
         var bus = new Bus(TEST_ROM);
         bus.memWrite(100, 0xA2);
@@ -68,13 +84,6 @@ public class JESTest implements Trace {
         assertEquals("0064  A2 01     LDX #$01                        A:01 X:02 Y:03 P:24 SP:FD", result.get(0));
         assertEquals("0066  CA        DEX                             A:01 X:01 Y:03 P:24 SP:FD", result.get(1));
         assertEquals("0067  88        DEY                             A:01 X:00 Y:03 P:26 SP:FD", result.get(2));
-    }
-
-    @Test
-    public void testMemReadWriteToRam() {
-        var bus = new Bus(TEST_ROM);
-        bus.memWrite(0x01, 0x55);
-        assertEquals(bus.memRead(0x01), 0x55);
     }
 
     @Test
@@ -111,9 +120,9 @@ public class JESTest implements Trace {
         var cpu = new CPU(new Bus(Rom.testRomContaining(new short[]{0xA9, 0x05, 0x00})));
         cpu.run();
 
-        assertEquals(cpu.getAcc(), 0x05);
-        assertEquals((cpu.getStatus() & 0x2), 0);
-        assertEquals((cpu.getStatus() & 0x80), 0);
+        assertEquals(0x05, cpu.getAcc());
+        assertEquals(0, (cpu.getStatus() & 0x2));
+        assertEquals(0, (cpu.getStatus() & 0x80));
     }
 
     @Test
