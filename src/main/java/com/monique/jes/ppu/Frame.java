@@ -13,7 +13,7 @@ public class Frame {
     }
     
     public void setPixel(int x, int y, Color rgb) {
-        data.setRGB(x, y, rgb.getRGB());
+        data.setRGB(x % WIDTH, y % HEIGHT, rgb.getRGB());
     }
 
     public BufferedImage getData() {

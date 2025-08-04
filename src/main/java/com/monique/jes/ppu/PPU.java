@@ -158,7 +158,8 @@ public class PPU implements Memory {
                 int addrMirror = addrTmp - 0x10;
                 palleteTable[addrMirror - 0x3F00] = value;
             } else if (addrTmp <= 0x3FFF) {
-                palleteTable[addrTmp - 0x3F00] = value;
+                // System.out.printf("Palette write: %04X = %02X\n", addrTmp, value);
+                palleteTable[(addrTmp - 0x3F00) & 0x1F] = (short) value;
             } else {
                 throw new UnexpectedAccessException(addrTmp);
             }
@@ -184,9 +185,9 @@ public class PPU implements Memory {
                 throw new Exception("Addr " + addrTmp + " shouldn't be used in reality");
             } else if (addrTmp == 0x3F10 || addrTmp == 0x3F14 || addrTmp == 0x3F18 || addrTmp == 0x3F1C) {
                 int addrMirror = addrTmp - 0x10;
-                return unsignByte(palleteTable[addrMirror - 0x3F00]);
+                return unsignByte(palleteTable[(addrMirror - 0x3F00) & 0x1F]);
             } else if (addrTmp <= 0x3FFF) {
-                return unsignByte(palleteTable[addrTmp - 0x3F00]);
+                return unsignByte(palleteTable[(addrTmp - 0x3F00) & 0x1F]);
             } else {
                 throw new UnexpectedAccessException(addrTmp);
             }

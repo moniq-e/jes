@@ -42,7 +42,9 @@ public class Bus implements Memory {
         this.cycles += cycles;
 
         var nmiBefore = ppu.pollNmiInterrupt().isPresent();
-        ppu.tick(unsignByte(cycles * 3));
+        for (int i = 0; i < cycles * 3; i++) {
+            ppu.tick((short)1);
+        }
         var nmiAfter = ppu.pollNmiInterrupt().isPresent();
 
         if (!nmiBefore && nmiAfter) {
@@ -76,10 +78,8 @@ public class Bus implements Memory {
         } else if (addr == 0x2007) {
             return ppu.readData();
         } else if (addr >= 0x2008 && addr <= PPU_REGISTERS_MIRRORS_END) {
-
             int mirrorDownAddr = addr & 0x2007;
             return memRead(mirrorDownAddr);
-
         } else if (addr == 0x4016) {
             return joypad.read();
         } else if (addr == 0x4017) {
@@ -134,6 +134,8 @@ public class Bus implements Memory {
             //ignoring joypad2
         } else if (addr >= 0x8000 && addr <= 0xFFFF) {
             System.err.println("Attempt to write to Cartridge ROM space.");
+        } else if ((addr >= 0x4000 && addr <= 0x4013) || addr == 0x4015 || addr == 0x4017) {
+            // APU registers: ignore for now, no warning
         } else {
             System.out.printf("Ignoring mem write-access at %x.\n", addr);
         }
@@ -148,6 +150,10 @@ public class Bus implements Memory {
     }
 
     public Optional<Short> pollNMIStatus() {
-        return ppu.pollNmiInterrupt();
+        var nmi = ppu.pollNmiInterrupt();
+        if (nmi.isPresent()) {
+            ppu.setNmiInterrupt(Optional.empty());
+        }
+        return nmi;
     }
 }

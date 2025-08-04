@@ -17,7 +17,7 @@ public class JESTest implements Trace {
     public final Rom TEST_ROM;
 
     public JESTest() throws Exception {
-        TEST_ROM = Rom.of(getClass().getResourceAsStream("/nestest.nes"));
+        TEST_ROM = Rom.of(getClass().getResourceAsStream("/pacman.nes"));
     }
 
     @Test
@@ -27,7 +27,7 @@ public class JESTest implements Trace {
 
         var cpu = new CPU(new Bus(TEST_ROM));
         cpu.reset();
-        cpu.setPC(0xC000);
+        // cpu.setPC(0xC000);
         try {
             cpu.runWithCallback(c -> {
                 try {
